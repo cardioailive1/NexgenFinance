@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — NexGen Finance | Corverxis Technologies</title>
+  <style>
+    :root {
+      --bg: #0A1628; --panel: #0F2645; --border: rgba(255,255,255,.08);
+      --accent: #4F8EF7; --text: #E8EDF5; --muted: #8896A8;
+      --google: #4285F4; --github: #24292F; --microsoft: #00A4EF;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif;
+           display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px; }
+    .card { background: var(--panel); border: 1px solid var(--border); border-radius: 18px;
+            padding: 40px 36px; width: 100%; max-width: 400px; text-align: center; }
+    .logo { font-size: 28px; font-weight: 900; color: var(--accent); letter-spacing: -1px; margin-bottom: 6px; }
+    .brand { font-size: 11px; color: var(--muted); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 32px; }
+    h1 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+    .sub { font-size: 13px; color: var(--muted); margin-bottom: 32px; line-height: 1.5; }
+    .btn { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%;
+           padding: 14px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer;
+           text-decoration: none; border: 1px solid var(--border); margin-bottom: 12px;
+           transition: opacity .15s, transform .1s; color: #fff; }
+    .btn:hover { opacity: .88; transform: translateY(-1px); }
+    .btn-google    { background: var(--google); }
+    .btn-github    { background: var(--github); }
+    .btn-microsoft { background: var(--microsoft); }
+    .divider { display: flex; align-items: center; gap: 12px; margin: 8px 0 20px;
+               color: var(--muted); font-size: 11px; }
+    .divider::before, .divider::after { content:''; flex:1; height:1px; background: var(--border); }
+    .footer { font-size: 11px; color: var(--muted); margin-top: 28px; line-height: 1.6; }
+    .footer a { color: var(--accent); text-decoration: none; }
+    .error-msg { background: rgba(255,80,80,.1); border: 1px solid rgba(255,80,80,.3);
+                 color: #ff6b6b; border-radius: 8px; padding: 10px 14px; font-size: 12.5px;
+                 margin-bottom: 20px; display: none; }
+    svg { width: 20px; height: 20px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="logo">NexGen</div>
+    <div class="brand">Finance — by Corverxis Technologies</div>
+
+    <h1>Sign in to continue</h1>
+    <p class="sub">Access AI-powered financial analysis, trading intelligence, and compliance-grade reporting.</p>
+
+    <div class="error-msg" id="errorMsg"></div>
+
+    <a class="btn btn-google" href="/api/auth/google">
+      <svg viewBox="0 0 48 48"><path fill="#FFF" d="M44.5 20H24v8.5h11.8C34.7 33.9 29.9 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.9 20-21 0-1.3-.2-2.7-.5-4z"/></svg>
+      Continue with Google
+    </a>
+
+    <a class="btn btn-github" href="/api/auth/github">
+      <svg viewBox="0 0 24 24" fill="white"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+      Continue with GitHub
+    </a>
+
+    <a class="btn btn-microsoft" href="/api/auth/microsoft">
+      <svg viewBox="0 0 23 23" fill="white"><path d="M0 0h11v11H0zm12 0h11v11H12zM0 12h11v11H0zm12 0h11v11H12z"/></svg>
+      Continue with Microsoft
+    </a>
+
+    <div class="footer">
+      By signing in you agree to our
+      <a href="/privacy">Privacy Policy</a> and
+      <a href="/terms">Terms of Service</a>.<br/>
+      Protected by SOC 2 Type II &bull; GDPR &bull; CCPA compliance.
+    </div>
+  </div>
+
+  <script>
+    // Surface OAuth error from query string
+    const params = new URLSearchParams(location.search);
+    const err = params.get('error');
+    if (err) {
+      const el = document.getElementById('errorMsg');
+      const msgs = {
+        google_failed:    'Google sign-in failed. Please try again.',
+        github_failed:    'GitHub sign-in failed. Please try again.',
+        microsoft_failed: 'Microsoft sign-in failed. Please try again.',
+        oauth_failed:     'Sign-in failed. No email was returned by the provider.',
+        server_error:     'A server error occurred. Please try again shortly.',
+      };
+      el.textContent = msgs[err] || 'Sign-in failed. Please try again.';
+      el.style.display = 'block';
+    }
+  </script>
+</body>
+</html>
