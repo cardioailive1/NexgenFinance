@@ -1,0 +1,292 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Enums ───────────────────────────────────────────────────────────────────
+
+enum Role {
+  USER
+  ANALYST
+  ADMIN
+  SUPER_ADMIN
+}
+
+enum Plan {
+  FREE
+  PRO
+  ENTERPRISE
+}
+
+enum ReportModule {
+  STATEMENTS
+  ACCOUNTING
+  AUDIT
+  MARKET
+  TRADING
+}
+
+enum AuditAction {
+  LOGIN
+  LOGOUT
+  REGISTER
+  TOKEN_REFRESH
+  REPORT_GENERATE
+  REPORT_VIEW
+  REPORT_EXPORT
+  REPORT_DELETE
+  USER_UPDATE
+  USER_DELETE
+  PLAN_UPGRADE
+  DATA_EXPORT
+  DATA_DELETE_REQUEST
+  API_KEY_CREATE
+  API_KEY_REVOKE
+  CONSENT_GIVEN
+  CONSENT_WITHDRAWN
+  SECURITY_ALERT
+  RATE_LIMIT_HIT
+  FAILED_LOGIN
+  PASSWORD_RESET
+}
+
+enum DataRequestStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+}
+
+// ─── Core Models ─────────────────────────────────────────────────────────────
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  name         String?
+  avatar       String?
+  provider     String    // google | github | microsoft | local
+  providerId   String
+  role         Role      @default(USER)
+  plan         Plan      @default(FREE)
+
+  // Trial & usage
+  trialUsed    Int       @default(0)
+  trialMax     Int       @default(10)
+  reportsTotal Int       @default(0)
+
+  // Compliance & privacy
+  consentGdpr       Boolean   @default(false)
+  consentDate       DateTime?
+  consentIp         String?
+  dataRetentionDays Int       @default(365)
+  marketingOptIn    Boolean   @default(false)
+
+  // Account state
+  isActive          Boolean   @default(true)
+  isEmailVerified   Boolean   @default(false)
+  isMfaEnabled      Boolean   @default(false)
+  lastLoginAt       DateTime?
+  lastLoginIp       String?
+  passwordHash      String?   // for local auth only
+  mfaSecret         String?
+
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime? // soft delete for GDPR
+
+  // Relations
+  sessions       Session[]
+  reports        Report[]
+  auditLogs      AuditLog[]
+  apiKeys        ApiKey[]
+  dataRequests   DataRequest[]
+  notifications  Notification[]
+
+  @@unique([provider, providerId])
+  @@index([email])
+  @@index([createdAt])
+  @@map("users")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  accessToken  String   @unique
+  refreshToken String   @unique
+  accessExpiry DateTime
+  refreshExpiry DateTime
+
+  ipAddress    String?
+  userAgent    String?
+  deviceId     String?
+  isRevoked    Boolean  @default(false)
+  revokedAt    DateTime?
+  revokedReason String?
+
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
+  @@index([refreshToken])
+  @@index([accessExpiry])
+  @@map("sessions")
+}
+
+model Report {
+  id           String       @id @default(cuid())
+  userId       String
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  module       ReportModule
+  reportType   String       // e.g. income, balance, equity_forecast
+  title        String
+  inputDataEnc String       // AES-256 encrypted JSON of form inputs
+  outputEnc    String       // AES-256 encrypted report output
+  contentHash  String       // SHA-256 for tamper detection (SEC)
+  tokenCount   Int          @default(0)
+  modelUsed    String       @default("claude-sonnet-4-6")
+
+  // Retention (SEC requires 7 years for financial records)
+  retainUntil  DateTime
+  isArchived   Boolean      @default(false)
+  archivedAt   DateTime?
+
+  // Export tracking
+  exportedAt   DateTime?
+  exportFormat String?
+
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  deletedAt    DateTime?
+
+  @@index([userId])
+  @@index([module])
+  @@index([createdAt])
+  @@index([retainUntil])
+  @@map("reports")
+}
+
+model AuditLog {
+  id          String      @id @default(cuid())
+  userId      String?
+  user        User?       @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  action      AuditAction
+  resource    String?     // e.g. "report:abc123"
+  details     Json?       // structured context
+  outcome     String      // success | failure | blocked
+
+  ipAddress   String?
+  userAgent   String?
+  requestId   String?     // for request correlation
+  sessionId   String?
+
+  // Tamper-evident chain (SOC2 Type II)
+  prevHash    String?     // hash of previous log entry
+  entryHash   String      // SHA-256 of this entry
+
+  createdAt   DateTime    @default(now())
+
+  @@index([userId])
+  @@index([action])
+  @@index([createdAt])
+  @@index([requestId])
+  @@map("audit_logs")
+}
+
+model ApiKey {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name        String
+  keyHash     String    @unique  // bcrypt hash of actual key
+  keyPrefix   String             // first 8 chars for identification
+  scopes      String[]           // e.g. ["reports:read", "reports:write"]
+  rateLimit   Int       @default(100) // requests per hour
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  isRevoked   Boolean   @default(false)
+  revokedAt   DateTime?
+
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([keyHash])
+  @@map("api_keys")
+}
+
+// ─── Compliance & Privacy Models ─────────────────────────────────────────────
+
+model DataRequest {
+  id          String            @id @default(cuid())
+  userId      String
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  type        String            // export | delete | portability | rectification
+  status      DataRequestStatus @default(PENDING)
+  requestIp   String?
+  completedAt DateTime?
+  downloadUrl String?
+  notes       String?
+
+  // Legal hold — prevents deletion during SEC/regulatory review
+  legalHold   Boolean           @default(false)
+  holdReason  String?
+
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  @@index([userId])
+  @@index([status])
+  @@map("data_requests")
+}
+
+model ConsentRecord {
+  id          String   @id @default(cuid())
+  userId      String
+  consentType String   // gdpr | ccpa | marketing | cookies
+  granted     Boolean
+  ipAddress   String?
+  userAgent   String?
+  version     String   // policy version at time of consent
+  createdAt   DateTime @default(now())
+
+  @@index([userId])
+  @@index([createdAt])
+  @@map("consent_records")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String
+  title     String
+  body      String
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([isRead])
+  @@map("notifications")
+}
+
+model SystemConfig {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String
+  encrypted Boolean  @default(false)
+  updatedAt DateTime @updatedAt
+  updatedBy String?
+
+  @@map("system_config")
+}
