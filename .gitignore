@@ -1,0 +1,15 @@
+node_modules/
+.env
+.env.local
+.env.*.local
+logs/
+*.log
+dist/
+coverage/
+.nyc_output/
+prisma/migrations/
+!prisma/migrations/.gitkeep
+.DS_Store
+*.pem
+*.key
+*.cert

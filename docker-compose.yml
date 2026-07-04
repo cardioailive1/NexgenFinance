@@ -1,0 +1,36 @@
+version: '3.9'
+
+services:
+  app:
+    build: .
+    ports:
+      - "10000:10000"
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql://nexgen:nexgen_dev@db:5432/nexgen_finance
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER:     nexgen
+      POSTGRES_PASSWORD: nexgen_dev
+      POSTGRES_DB:       nexgen_finance
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nexgen -d nexgen_finance"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  postgres_data:

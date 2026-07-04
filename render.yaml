@@ -1,0 +1,109 @@
+##############################################################################
+#  NexGen Finance — Render.com deployment manifest
+#  https://render.com/docs/yaml-spec
+##############################################################################
+
+services:
+  # ── Web Service ─────────────────────────────────────────────────────────────
+  - type: web
+    name: nexgen-finance
+    runtime: node
+    region: oregon             # or frankfurt for EU data residency (GDPR)
+    plan: starter              # upgrade to standard/pro for production SLA
+    branch: main
+    rootDir: .
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /health
+
+    # Auto-deploy on push to main
+    autoDeploy: true
+
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+      - key: PORT
+        value: "10000"
+
+      # JWT secrets — generate with: openssl rand -hex 64
+      - key: JWT_ACCESS_SECRET
+        generateValue: true
+
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+
+      # Encryption key — MUST be 32-byte hex (64 chars): openssl rand -hex 32
+      - key: ENCRYPTION_KEY
+        generateValue: false    # Set manually — 64-char hex string
+
+      - key: SESSION_SECRET
+        generateValue: true
+
+      # Database — auto-populated from the db service below
+      - key: DATABASE_URL
+        fromDatabase:
+          name: nexgen-finance-db
+          property: connectionString
+
+      # Anthropic API key — set in Render dashboard, never commit
+      - key: ANTHROPIC_API_KEY
+        sync: false             # Set manually in Render dashboard
+
+      # OAuth2 — set in Render dashboard after registering apps
+      - key: GOOGLE_CLIENT_ID
+        sync: false
+      - key: GOOGLE_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_CALLBACK_URL
+        sync: false             # https://nexgen-finance.onrender.com/api/auth/google/callback
+
+      - key: GITHUB_CLIENT_ID
+        sync: false
+      - key: GITHUB_CLIENT_SECRET
+        sync: false
+      - key: GITHUB_CALLBACK_URL
+        sync: false             # https://nexgen-finance.onrender.com/api/auth/github/callback
+
+      - key: MICROSOFT_CLIENT_ID
+        sync: false
+      - key: MICROSOFT_CLIENT_SECRET
+        sync: false
+      - key: MICROSOFT_CALLBACK_URL
+        sync: false             # https://nexgen-finance.onrender.com/api/auth/microsoft/callback
+
+      # Frontend / CORS
+      - key: FRONTEND_URL
+        value: https://nexgen-finance.onrender.com
+
+      - key: CORS_ORIGINS
+        value: https://nexgen-finance.onrender.com
+
+      # Compliance
+      - key: SEC_RETENTION_YEARS
+        value: "7"
+
+      - key: POLICY_VERSION
+        value: "1.0.0"
+
+      - key: DPO_EMAIL
+        value: privacy@corverxis.com
+
+      - key: LOG_LEVEL
+        value: info
+
+    # Scaling (upgrade plan for multi-instance)
+    scaling:
+      minInstances: 1
+      maxInstances: 3
+      targetMemoryPercent: 80
+      targetCPUPercent: 75
+
+  # ── PostgreSQL Database ─────────────────────────────────────────────────────
+databases:
+  - name: nexgen-finance-db
+    databaseName: nexgen_finance
+    user: nexgen
+    region: oregon             # Match web service region
+    plan: starter              # starter = 1GB; upgrade for production
+    ipAllowList: []            # Restrict to Render internal network only
