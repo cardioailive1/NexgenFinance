@@ -82,5 +82,5 @@ databases:
     databaseName: nexgen_finance
     user: nexgen
     region: oregon
-    plan: starter
+    plan: free
     ipAllowList: []
