@@ -11,7 +11,7 @@ services:
     plan: starter
     branch: main
     rootDir: .
-    buildCommand: npm install && npm run build
+    buildCommand: npm install && npx prisma generate && npx prisma db push && npm run prisma:seed
     startCommand: npm start
     healthCheckPath: /health
     autoDeploy: true
