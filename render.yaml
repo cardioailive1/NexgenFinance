@@ -11,7 +11,7 @@ services:
     plan: starter
     branch: main
     rootDir: .
-    buildCommand: npm ci && npm run build
+    buildCommand: npm install && npm run build
     startCommand: npm start
     healthCheckPath: /health
     autoDeploy: true
@@ -58,11 +58,9 @@ services:
       - key: SESSION_SECRET
         generateValue: true
 
-      # ── Database (auto-linked) ───────────────────────────────────────────────
-      - key: DATABASE_URL
-        fromDatabase:
-          name: nexgen-finance-db
-          property: connectionString
+      # ── Database — paste your existing Render Postgres connection string ──────
+      # Go to: Render Dashboard → your existing DB → Info → Internal Database URL
+      # Then add it manually in: Web Service → Environment → DATABASE_URL
 
       # ── Secrets — set manually in Render dashboard after deploy ─────────────
       # ANTHROPIC_API_KEY     — your sk-ant-... key
@@ -76,11 +74,3 @@ services:
       # MICROSOFT_CLIENT_ID      — from portal.azure.com
       # MICROSOFT_CLIENT_SECRET  — from portal.azure.com
       # MICROSOFT_CALLBACK_URL   — https://nexgen-finance.onrender.com/api/auth/microsoft/callback
-
-databases:
-  - name: nexgen-finance-db
-    databaseName: nexgen_finance
-    user: nexgen
-    region: oregon
-    plan: free
-    ipAllowList: []
