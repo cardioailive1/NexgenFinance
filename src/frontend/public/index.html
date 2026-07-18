@@ -1389,11 +1389,25 @@ document.addEventListener('DOMContentLoaded', function(){
 
 // Check session on load — redirect to /auth.html if not authenticated
 window.checkAuth = async function() {
-  try {
-    var fragment = window.location.search;
-    var atMatch  = fragment.match(/[?&]at=([^&]+)/);
-    if (atMatch) history.replaceState(null, '', window.location.pathname);
+  // Detect OAuth error redirected back with ?error=
+  var params = new URLSearchParams(window.location.search);
+  var oauthError = params.get('error');
+  if (oauthError) {
+    history.replaceState(null, '', window.location.pathname);
+    var msgs = {
+      oauth_failed:        'Sign-in failed. No email was returned by the provider.',
+      server_error:        'A server error occurred during sign-in. Please try again.',
+      google_failed:       'Google sign-in failed. Please try again.',
+      github_failed:       'GitHub sign-in failed. Please try again.',
+      microsoft_failed:    'Microsoft sign-in failed. Please try again.',
+      google_not_configured:    'Google sign-in is not configured yet.',
+      github_not_configured:    'GitHub sign-in is not configured yet.',
+      microsoft_not_configured: 'Microsoft sign-in is not configured yet.',
+    };
+    setTimeout(function(){ toast('\u26A0 ' + (msgs[oauthError] || 'Sign-in error. Please try again.')); }, 400);
+  }
 
+  try {
     var r = await fetch(API_BASE + '/api/auth/me', { credentials: 'include' });
 
     if (r.ok) {
@@ -1402,13 +1416,12 @@ window.checkAuth = async function() {
       return;
     }
 
-    // 401 = not logged in, 404 = routes not ready, any other = show auth wall
+    // Not authenticated — show auth wall
     var wall = document.getElementById('authWall');
     if (wall) wall.style.display = 'flex';
     var signInBtn = document.getElementById('signInBtn');
     if (signInBtn) signInBtn.style.display = 'inline-flex';
   } catch (e) {
-    // Network error or server down — show auth wall gracefully
     var wall = document.getElementById('authWall');
     if (wall) wall.style.display = 'flex';
   }
