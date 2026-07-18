@@ -320,48 +320,30 @@ a{color:inherit}
         </div>
       </div>
 
-      <!-- Right: form card -->
+      <!-- Right: OAuth sign-in card -->
       <div style="background:var(--panel);border:1px solid var(--b3);border-radius:14px;padding:28px;width:100%;max-width:380px;flex-shrink:0">
-        <div style="display:flex;background:var(--bg);border-radius:8px;padding:3px;margin-bottom:18px;border:1px solid var(--b)">
-          <button id="tabIn" class="auth-tab" onclick="authTab('in')">SIGN IN</button>
-          <button id="tabUp" class="auth-tab active" onclick="authTab('up')">CREATE ACCOUNT</button>
+        <div style="font-family:var(--display);font-size:18px;font-weight:800;color:#fff;margin-bottom:6px">Sign in to continue</div>
+        <div style="font-size:12px;color:var(--muted);margin-bottom:24px;line-height:1.6">Choose your provider. A free account with 10 reports is created on first sign-in.</div>
+
+        <a href="/api/auth/google" style="display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:13px;border-radius:10px;background:#4285F4;color:#fff;font-size:13.5px;font-weight:600;text-decoration:none;margin-bottom:11px;border:none;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFF" d="M44.5 20H24v8.5h11.8C34.7 33.9 29.9 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.9 20-21 0-1.3-.2-2.7-.5-4z"/></svg>
+          Continue with Google
+        </a>
+
+        <a href="/api/auth/github" style="display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:13px;border-radius:10px;background:#24292F;color:#fff;font-size:13.5px;font-weight:600;text-decoration:none;margin-bottom:11px;border:none;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          Continue with GitHub
+        </a>
+
+        <a href="/api/auth/microsoft" style="display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:13px;border-radius:10px;background:#00A4EF;color:#fff;font-size:13.5px;font-weight:600;text-decoration:none;border:none;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+          <svg width="18" height="18" viewBox="0 0 23 23" fill="white"><path d="M0 0h11v11H0zm12 0h11v11H12zM0 12h11v11H0zm12 0h11v11H12z"/></svg>
+          Continue with Microsoft
+        </a>
+
+        <div style="margin-top:18px;text-align:center;font-family:var(--mono);font-size:9px;color:var(--muted)">
+          SOC 2 &bull; GDPR &bull; CCPA compliant &nbsp;&middot;&nbsp; No credit card required
         </div>
-
-        <div id="errIn" style="display:none;font-family:var(--mono);font-size:10px;color:var(--red);background:rgba(255,92,92,.07);border:1px solid rgba(255,92,92,.2);border-radius:6px;padding:8px 12px;margin-bottom:10px"></div>
-        <div id="errUp" style="display:none;font-family:var(--mono);font-size:10px;color:var(--red);background:rgba(255,92,92,.07);border:1px solid rgba(255,92,92,.2);border-radius:6px;padding:8px 12px;margin-bottom:10px"></div>
-        <div id="errReset" style="display:none;font-family:var(--mono);font-size:10px;color:var(--red);background:rgba(255,92,92,.07);border:1px solid rgba(255,92,92,.2);border-radius:6px;padding:8px 12px;margin-bottom:10px"></div>
-
-        <!-- Sign In -->
-        <div id="formIn" style="display:none">
-          <div class="auth-label">Email</div>
-          <input id="emailIn" type="email" class="auth-input" placeholder="you@company.com"/>
-          <div class="auth-label">Password</div>
-          <input id="passIn" type="password" class="auth-input" placeholder="Your password"/>
-          <button id="btnIn" onclick="doSignIn()" class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:10px;margin-top:4px">Sign In &#x2192;</button>
-          <div style="text-align:center;font-family:var(--mono);font-size:9px;color:var(--muted)">
-            <span onclick="forgotPassword()" style="color:var(--accent);cursor:pointer;text-decoration:underline;text-underline-offset:3px">Forgot password?</span>
-            &nbsp;&middot;&nbsp;
-            <span onclick="authTab('up')" style="color:var(--accent);cursor:pointer">Create account</span>
-          </div>
-        </div>
-
-        <!-- Create Account -->
-        <div id="formUp">
-          <div class="auth-label">Full Name</div>
-          <input id="nameUp" type="text" class="auth-input" placeholder="Alex Morgan"/>
-          <div class="auth-label">Email</div>
-          <input id="emailUp" type="email" class="auth-input" placeholder="you@company.com"/>
-          <div class="auth-label">Password</div>
-          <input id="passUp" type="password" class="auth-input" placeholder="Min. 6 characters"/>
-
-          <div id="consentRow" style="display:flex;align-items:flex-start;gap:9px;margin:12px 0;padding:10px 12px;background:var(--a2);border:1px solid var(--b2);border-radius:7px">
-            <input type="checkbox" id="consentCheck" style="margin-top:2px;accent-color:var(--accent);width:14px;height:14px;flex-shrink:0;cursor:pointer"/>
-            <label for="consentCheck" style="font-family:var(--mono);font-size:9.5px;color:var(--dim);line-height:1.6;cursor:pointer">I have read and agree to the <span onclick="openPrivacy();event.preventDefault();" style="color:var(--accent);text-decoration:underline;text-underline-offset:3px;cursor:pointer">Privacy Policy</span> and <span onclick="openPrivacy();event.preventDefault();" style="color:var(--accent);text-decoration:underline;text-underline-offset:3px;cursor:pointer">Terms of Service</span></label>
-          </div>
-
-          <button id="btnUp" onclick="doSignUp()" class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:10px">Create Free Account &#x2192;</button>
-          <div style="text-align:center;font-family:var(--mono);font-size:9px;color:var(--muted)">3 free reports &nbsp;&middot;&nbsp; No credit card required</div>
-          <div style="margin-top:8px;text-align:center;font-family:var(--mono);font-size:8.5px;color:var(--muted)">Already have an account? <span onclick="authTab('in')" style="color:var(--accent);cursor:pointer">Sign in</span></div>
+      </div>
         </div>
 
         <!-- Password Reset -->
@@ -1353,36 +1335,32 @@ function mdRender(text){
 }
 
 // ══════════════════════════════════════════════════════════════════
-// TRIAL / PLAN GATING
+// TRIAL / PLAN GATING — managed by backend, not localStorage
 // ══════════════════════════════════════════════════════════════════
 function checkTrial(){
-  if(_user && _user.user_metadata && _user.user_metadata.paid) return true;
-  var used = parseInt(localStorage.getItem('nf_reports_used')||'0', 10);
-  if(used >= 10){
+  // Gate is enforced server-side; this is just a client-side UX hint
+  if (!_user) return false;
+  if (_user.plan === 'PRO' || _user.plan === 'ENTERPRISE') return true;
+  if (_user.trialUsed >= _user.trialMax) {
     document.getElementById('upgradeWall').classList.add('on');
     return false;
   }
   return true;
 }
+
 function incrementTrial(){
-  if(_user && _user.user_metadata && _user.user_metadata.paid) return;
-  var used = parseInt(localStorage.getItem('nf_reports_used')||'0', 10) + 1;
-  localStorage.setItem('nf_reports_used', used);
-  updateTrialNav(used);
-}
-function updateTrialNav(used){
-  var el = document.getElementById('trialCountNav');
-  if(!el) return;
-  if(_user && _user.user_metadata && _user.user_metadata.paid){ el.style.display='none'; return; }
-  el.style.display = 'inline-block';
-  el.textContent = (10-used) + ' free reports left';
+  // Trial count is incremented by the backend on successful generation
+  // Update local user state optimistically for immediate UI feedback
+  if (_user && _user.plan === 'FREE') {
+    _user.trialUsed = (_user.trialUsed || 0) + 1;
+    updateTrialDisplay(_user);
+  }
 }
 
 function upgradeTo(plan){
-  localStorage.setItem('nf_pending_plan', plan);
   var links = {
     starter: 'https://buy.stripe.com/PLACEHOLDER_STARTER',
-    pro: 'https://buy.stripe.com/PLACEHOLDER_PRO'
+    pro:     'https://buy.stripe.com/PLACEHOLDER_PRO'
   };
   window.open(links[plan] || 'mailto:support@corverxis.com', '_blank');
 }
@@ -1400,272 +1378,186 @@ function toast(msg){
 // Init first form on load
 document.addEventListener('DOMContentLoaded', function(){
   renderForm('income');
-  updateTrialNav(parseInt(localStorage.getItem('nf_reports_used')||'0',10));
+  checkAuth();
 });
 </script>
 <script>
+'use strict';
 // ══════════════════════════════════════════════════════════════════
-// NexGen Finance — Supabase Auth
+// BACKEND AUTH — JWT + OAuth2 via /api/auth/*
 // ══════════════════════════════════════════════════════════════════
-(function(){
-  'use strict';
 
-  document.addEventListener('DOMContentLoaded', function(){
-    _sb.auth.getSession().then(function(r){
-      if(r.data && r.data.session) onSignedIn(r.data.session.user);
-      else showAuth('up');
-    });
-    _sb.auth.onAuthStateChange(function(e,s){
-      if(e === 'PASSWORD_RECOVERY'){ showResetForm(); return; }
-      if(s && s.user) onSignedIn(s.user);
-    });
-    // Stripe return
-    var p = new URLSearchParams(window.location.search);
-    if(p.get('success') || p.get('session_id')){
-      var plan = localStorage.getItem('nf_pending_plan') || 'pro';
-      _sb.auth.getSession().then(function(r){
-        if(!r.data || !r.data.session) return;
-        _sb.auth.updateUser({data:{plan:plan, paid:true}});
-        localStorage.removeItem('nf_pending_plan');
-        history.replaceState(null,'',window.location.pathname);
-        toast('\u2713 ' + plan.charAt(0).toUpperCase()+plan.slice(1) + ' plan activated!');
-      });
-    }
-  });
+// Check session on load — redirect to /auth.html if not authenticated
+window.checkAuth = async function() {
+  try {
+    var fragment = window.location.search;
+    var atMatch  = fragment.match(/[?&]at=([^&]+)/);
+    if (atMatch) history.replaceState(null, '', window.location.pathname);
 
-  window.onSignedIn = function(user){
-    _user = user;
-    var name = (user.user_metadata && user.user_metadata.full_name) ? user.user_metadata.full_name.split(' ')[0] : user.email.split('@')[0];
-    var wall = document.getElementById('authWall'); if(wall) wall.style.display = 'none';
-    var pill = document.getElementById('userPill'); if(pill){ pill.textContent = name; pill.style.display='inline-flex'; }
-    var signInBtn = document.getElementById('signInBtn'); if(signInBtn) signInBtn.style.display = 'none';
-    var mfaBtn = document.getElementById('mfaNavBtn'); if(mfaBtn) mfaBtn.style.display = 'inline-flex';
-    updateTrialNav(parseInt(localStorage.getItem('nf_reports_used')||'0',10));
-    toast('Welcome back, ' + name + ' \u2713');
-  };
+    var r = await fetch(API_BASE + '/api/auth/me', { credentials: 'include' });
 
-  window.authTab = function(tab){
-    var fi=document.getElementById('formIn'), fu=document.getElementById('formUp');
-    var ti=document.getElementById('tabIn'), tu=document.getElementById('tabUp');
-    var hl=document.getElementById('authHighlights');
-    var isIn = tab==='in';
-    if(fi) fi.style.display = isIn?'block':'none';
-    if(fu) fu.style.display = isIn?'none':'block';
-    if(hl) hl.style.display = isIn?'none':'block';
-    if(ti) ti.className = 'auth-tab'+(isIn?' active':'');
-    if(tu) tu.className = 'auth-tab'+(isIn?'':' active');
-    authErr('errIn',''); authErr('errUp','');
-  };
-  window.showAuth = function(tab){
-    var w = document.getElementById('authWall'); if(w) w.style.display='flex';
-    authTab(tab||'up');
-  };
-  window.closeAuth = function(){
-    var w = document.getElementById('authWall'); if(w) w.style.display='none';
-  };
-  function authErr(id,msg){
-    var e=document.getElementById(id);
-    if(e){ e.textContent=msg; e.style.display = msg?'block':'none'; }
-  }
-  function authBtn(id,on){
-    var b=document.getElementById(id); if(!b) return;
-    b.disabled=on; b.style.opacity=on?'.5':'1';
-    var labels={btnIn:'Sign In \u2192', btnUp:'Create Account \u2192'};
-    var loading={btnIn:'Signing in\u2026', btnUp:'Creating account\u2026'};
-    b.textContent = on ? (loading[id]||'Loading\u2026') : (labels[id]||b.textContent);
-  }
-
-  window.doSignIn = async function(){
-    authErr('errIn','');
-    var email=(document.getElementById('emailIn')||{}).value.trim()||'';
-    var pass=(document.getElementById('passIn')||{}).value||'';
-    if(!email.includes('@')){ authErr('errIn','Enter a valid email'); return; }
-    if(!pass){ authErr('errIn','Enter your password'); return; }
-    authBtn('btnIn',true);
-    var r = await _sb.auth.signInWithPassword({email:email,password:pass});
-    authBtn('btnIn',false);
-    if(r.error){ authErr('errIn', r.error.message.includes('Invalid')?'Incorrect email or password.':r.error.message); return; }
-    nxMFACheck(r.data.session, function(){ closeAuth(); onSignedIn(r.data.user); });
-  };
-
-  window.doSignUp = async function(){
-    authErr('errUp','');
-    var consent = document.getElementById('consentCheck');
-    if(consent && !consent.checked){
-      var row = document.getElementById('consentRow');
-      if(row){ row.style.borderColor='rgba(255,92,92,.5)'; row.style.background='rgba(255,80,80,.06)';
-        setTimeout(function(){ row.style.borderColor='var(--b2)'; row.style.background='var(--a2)'; },2500); }
-      authErr('errUp','Please agree to the Privacy Policy and Terms of Service to continue.');
+    if (r.ok) {
+      var user = await r.json();
+      onSignedIn(user);
       return;
     }
-    var name=(document.getElementById('nameUp')||{}).value.trim()||'';
-    var email=(document.getElementById('emailUp')||{}).value.trim()||'';
-    var pass=(document.getElementById('passUp')||{}).value||'';
-    if(!name){ authErr('errUp','Enter your full name'); return; }
-    if(!email.includes('@')){ authErr('errUp','Enter a valid email'); return; }
-    if(pass.length<6){ authErr('errUp','Password must be at least 6 characters'); return; }
-    authBtn('btnUp',true);
-    var r = await _sb.auth.signUp({email:email,password:pass,options:{data:{full_name:name},emailRedirectTo:window.location.href}});
-    authBtn('btnUp',false);
-    if(r.error){
-      var msg=r.error.message;
-      if(msg.includes('rate limit')||msg.includes('sending')){ authErr('errUp','\u26A0 Email rate limit \u2014 account created. Please sign in.'); setTimeout(function(){authTab('in');},2000); return; }
-      if(msg.includes('already')||msg.includes('registered')){ authErr('errUp','Account exists \u2014 please sign in.'); setTimeout(function(){authTab('in');},1500); return; }
-      authErr('errUp', msg); return;
-    }
-    closeAuth();
-    toast('Account created! Check your email to verify, then sign in.');
-  };
 
-  window.forgotPassword = async function(){
-    var email=(document.getElementById('emailIn')||{}).value.trim()||'';
-    if(!email.includes('@')){ authErr('errIn','Enter your email first, then click Forgot password'); return; }
-    var r = await _sb.auth.resetPasswordForEmail(email,{redirectTo:window.location.href+'?reset=1'});
-    if(r.error){ authErr('errIn', r.error.message); return; }
-    toast('\u2713 Reset link sent! Check your inbox.');
-  };
-
-  window.showResetForm = function(){
-    var w=document.getElementById('authWall'); if(w) w.style.display='flex';
-    var fi=document.getElementById('formIn'), fu=document.getElementById('formUp'), fr=document.getElementById('formReset');
-    if(fi) fi.style.display='none'; if(fu) fu.style.display='none'; if(fr) fr.style.display='block';
-  };
-  window.updatePasswordNow = async function(){
-    var pass=(document.getElementById('newPass')||{}).value||'';
-    if(pass.length<6){ authErr('errReset','Password must be at least 6 characters'); return; }
-    var r = await _sb.auth.updateUser({password:pass});
-    if(r.error){ authErr('errReset', r.error.message); return; }
-    toast('\u2713 Password updated! Signing you in\u2026');
-    history.replaceState(null,'',window.location.pathname);
-    _sb.auth.getSession().then(function(res){ if(res.data && res.data.session) onSignedIn(res.data.session.user); });
-  };
-
-  window.signOut = async function(){
-    await _sb.auth.signOut();
-    _user = null;
-    var pill=document.getElementById('userPill'); if(pill) pill.style.display='none';
-    var signInBtn=document.getElementById('signInBtn'); if(signInBtn) signInBtn.style.display='inline-flex';
-    var mfaBtn=document.getElementById('mfaNavBtn'); if(mfaBtn) mfaBtn.style.display='none';
-    showAuth('in');
-  };
-})();
-</script>
-<script>
-// ══════════════════════════════════════════════════════════════════
-// NexGen Finance — TOTP MFA (Supabase Auth MFA)
-// ══════════════════════════════════════════════════════════════════
-var _mfaFactorId = null;
-var _mfaPendingSession = null;
-var _mfaOnVerified = null;
-
-window.nxMFACheck = async function(session, onVerified){
-  try{
-    var r = await _sb.auth.mfa.getAuthenticatorAssuranceLevel();
-    if(r.data && r.data.nextLevel === 'aal2' && r.data.currentLevel !== 'aal2'){
-      var factors = await _sb.auth.mfa.listFactors();
-      var totp = factors.data && factors.data.totp && factors.data.totp[0];
-      if(totp){
-        _mfaFactorId = totp.id;
-        _mfaOnVerified = onVerified;
-        document.getElementById('nxMFAWall').style.display = 'flex';
-        document.getElementById('nxMFACode').focus();
-        return;
-      }
-    }
-    onVerified();
-  } catch(e){ onVerified(); }
-};
-
-window.nxMFAVerify = async function(){
-  var code = document.getElementById('nxMFACode').value.trim();
-  var err = document.getElementById('nxMFAErr');
-  err.style.display='none';
-  if(!/^\d{6}$/.test(code)){ err.textContent='Enter a valid 6-digit code'; err.style.display='block'; return; }
-  var btn = document.getElementById('nxMFAVerifyBtn');
-  btn.disabled=true; btn.textContent='Verifying\u2026';
-  try{
-    var challenge = await _sb.auth.mfa.challenge({factorId:_mfaFactorId});
-    if(challenge.error) throw challenge.error;
-    var verify = await _sb.auth.mfa.verify({factorId:_mfaFactorId, challengeId:challenge.data.id, code:code});
-    if(verify.error) throw verify.error;
-    document.getElementById('nxMFAWall').style.display='none';
-    document.getElementById('nxMFACode').value='';
-    if(_mfaOnVerified) _mfaOnVerified();
-  } catch(e){
-    err.textContent = e.message || 'Invalid code, try again';
-    err.style.display = 'block';
-  } finally {
-    btn.disabled=false; btn.textContent='Verify \u2192';
+    // 401 = not logged in, 404 = routes not ready, any other = show auth wall
+    var wall = document.getElementById('authWall');
+    if (wall) wall.style.display = 'flex';
+    var signInBtn = document.getElementById('signInBtn');
+    if (signInBtn) signInBtn.style.display = 'inline-flex';
+  } catch (e) {
+    // Network error or server down — show auth wall gracefully
+    var wall = document.getElementById('authWall');
+    if (wall) wall.style.display = 'flex';
   }
 };
 
-window.nxMFACancel = async function(){
-  document.getElementById('nxMFAWall').style.display='none';
-  document.getElementById('nxMFACode').value='';
-  await _sb.auth.signOut();
-  window.location.reload();
-};
+// Called once user is confirmed signed in
+window.onSignedIn = function(user) {
+  _user = user;
+  var name = (user.name || user.email || 'User').split(' ')[0];
 
-window.nxMFALoadStatus = async function(){
-  document.getElementById('nxMFAStatusLoading').style.display='block';
-  document.getElementById('nxMFAOffView').style.display='none';
-  document.getElementById('nxMFAOnView').style.display='none';
-  document.getElementById('nxMFAEnrollView').style.display='none';
-  document.getElementById('nxMFAStatusView').style.display='block';
-  try{
-    var factors = await _sb.auth.mfa.listFactors();
-    var totp = factors.data && factors.data.totp && factors.data.totp.find(function(f){return f.status==='verified';});
-    document.getElementById('nxMFAStatusLoading').style.display='none';
-    if(totp){ document.getElementById('nxMFAOnView').style.display='block'; }
-    else { document.getElementById('nxMFAOffView').style.display='block'; }
-  } catch(e){
-    document.getElementById('nxMFAStatusLoading').style.display='none';
-    document.getElementById('nxMFAOffView').style.display='block';
+  // Hide auth wall
+  var wall = document.getElementById('authWall');
+  if (wall) wall.style.display = 'none';
+
+  // Show user pill with name + sign-out title
+  var pill = document.getElementById('userPill');
+  if (pill) {
+    pill.textContent = name + ' \u2192';
+    pill.style.display = 'inline-flex';
+    pill.title = 'Signed in as ' + (user.email || '') + ' \u2014 click to sign out';
   }
+
+  // Hide generic sign-in button
+  var signInBtn = document.getElementById('signInBtn');
+  if (signInBtn) signInBtn.style.display = 'none';
+
+  // Hide MFA nav button (MFA managed by OAuth provider)
+  var mfaBtn = document.getElementById('mfaNavBtn');
+  if (mfaBtn) mfaBtn.style.display = 'none';
+
+  // Update trial counter
+  updateTrialDisplay(user);
+
+  toast('Welcome back, ' + name + ' \u2713');
 };
 
-window.nxMFAStartEnroll = async function(){
-  try{
-    var r = await _sb.auth.mfa.enroll({factorType:'totp'});
-    if(r.error) throw r.error;
-    _mfaFactorId = r.data.id;
-    document.getElementById('nxMFAStatusView').style.display='none';
-    document.getElementById('nxMFAEnrollView').style.display='block';
-    var qrBox = document.getElementById('nxMFAQRBox');
-    qrBox.innerHTML = '<img src="'+r.data.totp.qr_code+'" style="width:160px;height:160px"/>';
-    document.getElementById('nxMFASecret').textContent = r.data.totp.secret;
-  } catch(e){ toast('MFA enroll error: '+e.message); }
-};
+// Update trial / plan display in topbar
+window.updateTrialDisplay = function(userOrRemaining) {
+  var el = document.getElementById('trialCountNav');
+  if (!el) return;
 
-window.nxMFAConfirmEnroll = async function(){
-  var code = document.getElementById('nxMFAEnrollCode').value.trim();
-  var err = document.getElementById('nxMFAEnrollErr');
-  err.style.display='none';
-  if(!/^\d{6}$/.test(code)){ err.textContent='Enter a valid 6-digit code'; err.style.display='block'; return; }
-  try{
-    var challenge = await _sb.auth.mfa.challenge({factorId:_mfaFactorId});
-    if(challenge.error) throw challenge.error;
-    var verify = await _sb.auth.mfa.verify({factorId:_mfaFactorId, challengeId:challenge.data.id, code:code});
-    if(verify.error) throw verify.error;
-    toast('\u2713 MFA enabled successfully');
-    document.getElementById('nxMFAEnrollCode').value='';
-    nxMFALoadStatus();
-  } catch(e){
-    err.textContent = e.message || 'Invalid code';
-    err.style.display = 'block';
+  var remaining, plan;
+  if (typeof userOrRemaining === 'object') {
+    plan      = userOrRemaining.plan;
+    remaining = Math.max(0, (userOrRemaining.trialMax || 10) - (userOrRemaining.trialUsed || 0));
+  } else {
+    plan      = _user ? _user.plan : 'FREE';
+    remaining = userOrRemaining;
   }
-};
 
-window.nxMFADisable = async function(){
-  try{
-    var factors = await _sb.auth.mfa.listFactors();
-    var totp = factors.data && factors.data.totp && factors.data.totp[0];
-    if(totp){
-      await _sb.auth.mfa.unenroll({factorId:totp.id});
-      toast('MFA disabled');
-      nxMFALoadStatus();
+  if (plan === 'FREE') {
+    el.textContent = remaining + ' free report' + (remaining !== 1 ? 's' : '') + ' left';
+    el.style.display = 'inline-block';
+    if (remaining <= 3) {
+      el.style.borderColor = remaining === 0 ? 'rgba(255,92,92,.4)' : 'rgba(255,184,48,.4)';
+      el.style.color       = remaining === 0 ? 'var(--red)' : 'var(--amber)';
+      el.style.background  = remaining === 0 ? 'rgba(255,92,92,.08)' : 'rgba(255,184,48,.08)';
     }
-  } catch(e){ toast('Error: '+e.message); }
+  } else {
+    el.textContent = plan + ' Plan';
+    el.style.display    = 'inline-block';
+    el.style.color      = 'var(--green)';
+    el.style.borderColor = 'rgba(0,200,150,.3)';
+    el.style.background  = 'rgba(0,200,150,.08)';
+  }
+};
+
+// Collect all visible form field values for API payload
+window.collectFormData = function() {
+  var data = {};
+  document.querySelectorAll('.field-input, .field-select, .field-textarea').forEach(function(el) {
+    if (el.id) data[el.id] = el.value || '';
+  });
+  return data;
+};
+
+// Sign out — revoke session via backend, redirect to auth wall
+window.signOut = async function() {
+  try {
+    await fetch(API_BASE + '/api/auth/logout', {
+      method: 'POST',
+      credentials: 'include'
+    });
+  } catch (e) { /* ignore network errors on logout */ }
+
+  _user = null;
+
+  // Reset UI
+  var pill = document.getElementById('userPill');
+  if (pill) pill.style.display = 'none';
+  var signInBtn = document.getElementById('signInBtn');
+  if (signInBtn) signInBtn.style.display = 'inline-flex';
+  var trialEl = document.getElementById('trialCountNav');
+  if (trialEl) trialEl.style.display = 'none';
+
+  // Show auth wall
+  var wall = document.getElementById('authWall');
+  if (wall) wall.style.display = 'flex';
+
+  toast('Signed out successfully');
+};
+
+// Refresh access token silently using refresh token cookie
+window.refreshAuth = async function() {
+  try {
+    var r = await fetch(API_BASE + '/api/auth/refresh', {
+      method: 'POST',
+      credentials: 'include'
+    });
+    if (r.ok) return true;
+  } catch (e) {}
+  return false;
+};
+
+// ── Stub out / disable Supabase-dependent functions ──────────────────────────
+// MFA is now handled by the OAuth provider (Google/GitHub/Microsoft)
+
+window.authTab        = function() {};
+window.showAuth       = function() {
+  var wall = document.getElementById('authWall');
+  if (wall) wall.style.display = 'flex';
+};
+window.closeAuth      = function() {
+  var wall = document.getElementById('authWall');
+  if (wall) wall.style.display = 'none';
+};
+window.doSignIn       = function() { window.location.href = '/auth.html'; };
+window.doSignUp       = function() { window.location.href = '/auth.html'; };
+window.forgotPassword = function() {
+  toast('Password reset is managed by your OAuth provider (Google / GitHub / Microsoft).');
+};
+window.upgradeTo = function(plan) {
+  toast('Upgrade to ' + plan.toUpperCase() + ': contact support@corverxis.com');
+};
+
+// MFA stubs — managed by OAuth provider
+window.nxMFACheck        = function(s, cb) { if (cb) cb(); };
+window.nxMFACancel       = function() { signOut(); };
+window.nxMFAVerify       = function() { toast('MFA is managed by your OAuth provider.'); };
+window.nxMFALoadStatus   = function() {
+  var el = document.getElementById('nxMFAStatusLoading');
+  if (el) el.textContent = 'MFA is managed by your OAuth provider (Google / GitHub / Microsoft). Configure it there.';
+};
+window.nxMFAStartEnroll  = function() { toast('Configure MFA in your Google, GitHub, or Microsoft account settings.'); };
+window.nxMFAConfirmEnroll = function() {};
+window.nxMFADisable      = function() { toast('Disable MFA in your OAuth provider account settings.'); };
+window.openPrivacy        = function() {
+  var m = document.getElementById('nfPolicyModal');
+  if (m) { m.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
 };
 </script>
 
