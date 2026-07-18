@@ -182,18 +182,21 @@ async function me(req, res) {
 async function oauthCallback(req, res) {
   try {
     if (!req.user) {
-      return res.redirect(`${config.frontend.url}/auth?error=oauth_failed`);
+      logger.warn('OAuth callback: no user on request');
+      return res.redirect(`${config.frontend.url}/?error=oauth_failed`);
     }
 
-    const tokens  = issueTokens(req.user);
+    const tokens = issueTokens(req.user);
     await createSession(req.user, tokens, req);
     setCookies(res, tokens);
 
-    // Redirect to frontend with access token in URL fragment (never query string)
-    res.redirect(`${config.frontend.url}/app?at=${encodeURIComponent(tokens.accessToken)}`);
+    logger.info('OAuth login success', { userId: req.user.id, provider: req.user.provider });
+
+    // Redirect to root — cookies are already set, checkAuth will pick them up
+    res.redirect(`${config.frontend.url}/`);
   } catch (err) {
-    logger.error('OAuth callback error', { error: err.message });
-    res.redirect(`${config.frontend.url}/auth?error=server_error`);
+    logger.error('OAuth callback error', { error: err.message, stack: err.stack });
+    res.redirect(`${config.frontend.url}/?error=server_error`);
   }
 }
 
