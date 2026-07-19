@@ -3,7 +3,6 @@ require('dotenv').config();
 const express      = require('express');
 const cookieParser = require('cookie-parser');
 const session      = require('express-session');
-const pgSession    = require('connect-pg-simple')(session);
 const passport     = require('passport');
 const path         = require('path');
 const cron         = require('node-cron');
@@ -48,14 +47,8 @@ app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 app.use(cookieParser());
 
-// Session — DB-backed so OAuth state survives restarts (connect-pg-simple)
+// Session — memory store, only used for OAuth handshake state (seconds-lived)
 app.use(session({
-  store: new pgSession({
-    conString:   config.db.url,
-    tableName:   'pg_sessions',
-    createTableIfMissing: true,
-    pruneSessionInterval: 60 * 15, // prune every 15 min
-  }),
   secret:            config.session.secret,
   resave:            false,
   saveUninitialized: false,
@@ -63,7 +56,7 @@ app.use(session({
     secure:   config.isProd(),
     httpOnly: true,
     sameSite: 'lax',
-    maxAge:   10 * 60 * 1000, // 10 min — only needed for OAuth handshake
+    maxAge:   5 * 60 * 1000, // 5 min — only needed for OAuth state exchange
   },
 }));
 
