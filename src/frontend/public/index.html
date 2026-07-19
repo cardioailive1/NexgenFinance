@@ -1389,22 +1389,11 @@ document.addEventListener('DOMContentLoaded', function(){
 
 // Check session on load — redirect to /auth.html if not authenticated
 window.checkAuth = async function() {
-  // Detect OAuth error redirected back with ?error=
+  // Clear any ?error= from URL immediately before anything else
   var params = new URLSearchParams(window.location.search);
   var oauthError = params.get('error');
-  if (oauthError) {
+  if (window.location.search) {
     history.replaceState(null, '', window.location.pathname);
-    var msgs = {
-      oauth_failed:        'Sign-in failed. No email was returned by the provider.',
-      server_error:        'A server error occurred during sign-in. Please try again.',
-      google_failed:       'Google sign-in failed. Please try again.',
-      github_failed:       'GitHub sign-in failed. Please try again.',
-      microsoft_failed:    'Microsoft sign-in failed. Please try again.',
-      google_not_configured:    'Google sign-in is not configured yet.',
-      github_not_configured:    'GitHub sign-in is not configured yet.',
-      microsoft_not_configured: 'Microsoft sign-in is not configured yet.',
-    };
-    setTimeout(function(){ toast('\u26A0 ' + (msgs[oauthError] || 'Sign-in error. Please try again.')); }, 400);
   }
 
   try {
@@ -1421,6 +1410,22 @@ window.checkAuth = async function() {
     if (wall) wall.style.display = 'flex';
     var signInBtn = document.getElementById('signInBtn');
     if (signInBtn) signInBtn.style.display = 'inline-flex';
+
+    // Only show error toast if it's a real server-side error (not "not configured")
+    if (oauthError && oauthError !== 'microsoft_not_configured'
+        && oauthError !== 'github_not_configured'
+        && oauthError !== 'google_not_configured') {
+      var msgs = {
+        oauth_failed:    'Sign-in failed — no email returned by provider.',
+        server_error:    'A server error occurred. Please try again.',
+        google_failed:   'Google sign-in failed. Please try again.',
+        github_failed:   'GitHub sign-in failed. Please try again.',
+        microsoft_failed:'Microsoft sign-in failed. Please try again.',
+      };
+      setTimeout(function(){
+        toast('\u26A0 ' + (msgs[oauthError] || 'Sign-in error. Please try again.'));
+      }, 300);
+    }
   } catch (e) {
     var wall = document.getElementById('authWall');
     if (wall) wall.style.display = 'flex';
