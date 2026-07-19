@@ -5,8 +5,9 @@ const config = require('../config');
 const logger = require('../utils/logger');
 
 /**
- * Verify JWT access token from Authorization header or cookie.
- * Attaches req.user (User model) and req.session (Session model).
+ * Verify JWT access token — no DB session lookup required.
+ * JWT signature + expiry is sufficient for stateless auth.
+ * Sessions in DB are kept for audit/revocation only.
  */
 async function requireAuth(req, res, next) {
   try {
@@ -18,7 +19,7 @@ async function requireAuth(req, res, next) {
       return res.status(401).json({ error: 'Authentication required', code: 'NO_TOKEN' });
     }
 
-    // Verify signature & expiry
+    // Verify JWT signature and expiry
     let payload;
     try {
       payload = jwt.verify(token, config.jwt.accessSecret);
@@ -27,28 +28,18 @@ async function requireAuth(req, res, next) {
       return res.status(401).json({ error: 'Invalid or expired token', code });
     }
 
-    // Validate session still exists and is not revoked
-    const session = await prisma.session.findUnique({
-      where:   { accessToken: token },
-      include: { user: true },
-    });
+    // Fetch user from DB
+    const user = await prisma.user.findUnique({ where: { id: payload.sub } });
 
-    if (!session || session.isRevoked) {
-      return res.status(401).json({ error: 'Session revoked', code: 'SESSION_REVOKED' });
+    if (!user) {
+      return res.status(401).json({ error: 'User not found', code: 'USER_NOT_FOUND' });
     }
-    if (new Date() > session.accessExpiry) {
-      return res.status(401).json({ error: 'Session expired', code: 'TOKEN_EXPIRED' });
-    }
-
-    const user = session.user;
     if (!user.isActive || user.deletedAt) {
       return res.status(403).json({ error: 'Account disabled', code: 'ACCOUNT_DISABLED' });
     }
 
-    req.user    = user;
-    req.session = session;
+    req.user      = user;
     req.requestId = req.headers['x-request-id'] || payload.jti;
-
     next();
   } catch (err) {
     logger.error('Auth middleware error', { error: err.message });
@@ -56,10 +47,6 @@ async function requireAuth(req, res, next) {
   }
 }
 
-/**
- * Role guard factory — use after requireAuth
- * e.g. requireRole('ADMIN', 'SUPER_ADMIN')
- */
 function requireRole(...roles) {
   return (req, res, next) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
@@ -70,42 +57,23 @@ function requireRole(...roles) {
   };
 }
 
-/**
- * Plan guard factory — use after requireAuth
- * e.g. requirePlan('PRO', 'ENTERPRISE')
- */
 function requirePlan(...plans) {
   return (req, res, next) => {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
     if (!plans.includes(req.user.plan)) {
-      return res.status(402).json({
-        error:    'Plan upgrade required',
-        current:  req.user.plan,
-        required: plans,
-        upgradeUrl: '/billing/upgrade',
-      });
+      return res.status(402).json({ error: 'Plan upgrade required', current: req.user.plan, required: plans });
     }
     next();
   };
 }
 
-/**
- * Soft auth — attaches user if token present but doesn't block
- */
 async function optionalAuth(req, res, next) {
   try {
     const token = extractBearerToken(req) || req.cookies?.access_token;
     if (!token) return next();
-
     const payload = jwt.verify(token, config.jwt.accessSecret);
-    const session = await prisma.session.findUnique({
-      where:   { accessToken: token },
-      include: { user: true },
-    });
-    if (session && !session.isRevoked && session.user?.isActive) {
-      req.user    = session.user;
-      req.session = session;
-    }
+    const user    = await prisma.user.findUnique({ where: { id: payload.sub } });
+    if (user && user.isActive && !user.deletedAt) req.user = user;
   } catch (_) { /* ignore */ }
   next();
 }
