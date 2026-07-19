@@ -1139,25 +1139,7 @@ function generateReport(type){
 
   var isTrading = (_module === 'trading');
 
-  var XAI_SYSTEM = isTrading
-    ? 'You are NexGen Trading Agent, an elite AI market analyst and systematic trader built by Corverxis Technologies, powered by NexGen Ultra. You have access to a web search tool — ALWAYS use it to fetch current, live market prices and data before producing any analysis. Never rely on training data alone for prices or market conditions. You produce professional, actionable trade intelligence covering financial markets (equities, indices), currency markets (FX pairs, DXY), and commodity markets (energy, metals, agriculture, crypto). '+
-      'Always ground every forecast in CURRENT data from your search. Use precise numerical levels, clearly state directional bias, and include complete trade parameters. '+
-      'After your complete report, on a new line write exactly: ##XAI## then a new line, then "**Data sources & methodology**" with 2-3 sentences on what you searched and how you built the analysis, then a blank line, then "**Important disclaimer**" with 1-2 sentences that this is AI-generated analysis for educational purposes only and not financial advice — all trades involve risk of loss and users should consult a licensed financial advisor, then ##XAI## again on its own line.'
-    : 'You are NexGen Finance, an AI financial analyst built by Corverxis Technologies, powered by NexGen Ultra. You produce professional-grade financial statements, accounting documents, audit materials and market analysis. '+
-      'Always use proper accounting terminology, correctly formatted numbers (commas, parentheses for negatives, $ signs), and clean markdown tables for financial data. '+
-      'Be precise with calculations \u2014 numbers must foot and cross-check correctly. '+
-      'After your complete report, on a new line write exactly: ##XAI## then a new line, then "**How I approached this**" with 2-3 sentences on your methodology and what assumptions you made, then a blank line, then "**Confidence & verification**" with 1-2 sentences on what should be verified by a licensed CPA/CFA/auditor before relying on this for real decisions, then ##XAI## again on its own line. Never put the XAI block before or in the middle of the report \u2014 only at the very end.';
-
-  var fetchBody = {
-    model: 'claude-sonnet-4-6',
-    max_tokens: 4096,
-    system: XAI_SYSTEM,
-    messages: [{ role:'user', content: prompt }]
-  };
-
   if(isTrading){
-    fetchBody.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
-    // Show live data indicator
     container.innerHTML = '<div class="output-panel" style="border-color:rgba(255,184,48,.3)"><div class="output-header" style="background:rgba(255,184,48,.06);border-color:rgba(255,184,48,.2)"><div class="output-header-title" style="color:#FFB830">&#x1F4E1; NexGen Trading Agent &mdash; Fetching Live Market Data&hellip;</div><div style="font-family:var(--mono);font-size:8.5px;color:#FFB830;opacity:.7">Searching real-time prices &bull; Analysing markets &bull; Building forecast</div></div><div class="output-body" id="outputBody"><div style="font-family:var(--mono);font-size:11px;color:var(--muted)">&#x1F50D; Searching live market data\u2026</div></div></div>';
   }
 
@@ -1165,7 +1147,7 @@ function generateReport(type){
     method: 'POST',
     credentials: 'include',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ module: _module.toUpperCase(), reportType: type, prompt: prompt, inputData: collectFormData() })
+    body: JSON.stringify({ module: _module.toUpperCase(), reportType: type, prompt: prompt, inputData: data })
   })
   .then(function(r){
     if(r.status === 401){ window.location.href = '/auth'; return null; }
@@ -1375,9 +1357,9 @@ function toast(msg){
   clearTimeout(t._t); t._t = setTimeout(function(){ t.style.opacity = '0'; }, 3200);
 }
 
-// Init first form on load
+// Init on load
 document.addEventListener('DOMContentLoaded', function(){
-  renderForm('income');
+  setModule('statements');
   checkAuth();
 });
 </script>
@@ -1492,15 +1474,6 @@ window.updateTrialDisplay = function(userOrRemaining) {
     el.style.borderColor = 'rgba(0,200,150,.3)';
     el.style.background  = 'rgba(0,200,150,.08)';
   }
-};
-
-// Collect all visible form field values for API payload
-window.collectFormData = function() {
-  var data = {};
-  document.querySelectorAll('.field-input, .field-select, .field-textarea').forEach(function(el) {
-    if (el.id) data[el.id] = el.value || '';
-  });
-  return data;
 };
 
 // Sign out — revoke session via backend, redirect to auth wall
