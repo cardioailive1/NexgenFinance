@@ -187,12 +187,16 @@ async function oauthCallback(req, res) {
     }
 
     const tokens = issueTokens(req.user);
-    await createSession(req.user, tokens, req);
+
+    // Session creation is best-effort — auth works via JWT even if this fails
+    try {
+      await createSession(req.user, tokens, req);
+    } catch (sessionErr) {
+      logger.error('Session creation failed (non-fatal)', { error: sessionErr.message, userId: req.user.id });
+    }
+
     setCookies(res, tokens);
-
-    logger.info('OAuth login success', { userId: req.user.id, provider: req.user.provider });
-
-    // Redirect to root — cookies are already set, checkAuth will pick them up
+    logger.info('OAuth login success, redirecting to app', { userId: req.user.id });
     res.redirect(`${config.frontend.url}/`);
   } catch (err) {
     logger.error('OAuth callback error', { error: err.message, stack: err.stack });
