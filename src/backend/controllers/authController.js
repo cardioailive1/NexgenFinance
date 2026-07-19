@@ -16,7 +16,17 @@ function issueTokens(user) {
   const jti = uuidv4();
 
   const accessToken = jwt.sign(
-    { sub: user.id, email: user.email, role: user.role, plan: user.plan, jti },
+    {
+      sub:        user.id,
+      email:      user.email,
+      name:       user.name || null,
+      avatar:     user.avatar || null,
+      role:       user.role,
+      plan:       user.plan,
+      trialUsed:  user.trialUsed,
+      trialMax:   user.trialMax,
+      jti,
+    },
     config.jwt.accessSecret,
     { expiresIn: config.jwt.accessTtl }
   );
