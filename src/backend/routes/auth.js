@@ -9,38 +9,48 @@ const config   = require('../config');
 
 router.use(authLimiter);
 
-// ── OAuth2 initiation — only mount if credentials are configured ──────────────
+// ── Google ────────────────────────────────────────────────────────────────────
 if (config.oauth.google.clientId) {
-  router.get('/google', passport.authenticate('google', { scope: ['profile', 'email'], session: true }));
+  // Initiation: session:true stores OAuth state for CSRF verification
+  router.get('/google',
+    passport.authenticate('google', { scope: ['profile', 'email'], session: true })
+  );
+  // Callback: session:false — skip req.logIn/serializeUser, user is on req.user directly
   router.get('/google/callback',
-    passport.authenticate('google', { session: true, failureRedirect: '/?error=google_failed' }),
+    passport.authenticate('google', { session: false, failureRedirect: '/?error=google_failed' }),
     authCtrl.oauthCallback
   );
 } else {
-  router.get('/google',          (req, res) => res.redirect('/?error=google_not_configured'));
-  router.get('/google/callback', (req, res) => res.redirect('/?error=google_not_configured'));
+  router.get('/google',          (req, res) => res.redirect('/?error=provider_not_configured'));
+  router.get('/google/callback', (req, res) => res.redirect('/?error=provider_not_configured'));
 }
 
+// ── GitHub ────────────────────────────────────────────────────────────────────
 if (config.oauth.github.clientId) {
-  router.get('/github', passport.authenticate('github', { scope: ['user:email'], session: true }));
+  router.get('/github',
+    passport.authenticate('github', { scope: ['user:email'], session: true })
+  );
   router.get('/github/callback',
-    passport.authenticate('github', { session: true, failureRedirect: '/?error=github_failed' }),
+    passport.authenticate('github', { session: false, failureRedirect: '/?error=github_failed' }),
     authCtrl.oauthCallback
   );
 } else {
-  router.get('/github',          (req, res) => res.redirect('/?error=github_not_configured'));
-  router.get('/github/callback', (req, res) => res.redirect('/?error=github_not_configured'));
+  router.get('/github',          (req, res) => res.redirect('/?error=provider_not_configured'));
+  router.get('/github/callback', (req, res) => res.redirect('/?error=provider_not_configured'));
 }
 
+// ── Microsoft ─────────────────────────────────────────────────────────────────
 if (config.oauth.microsoft.clientId) {
-  router.get('/microsoft', passport.authenticate('microsoft', { session: true }));
+  router.get('/microsoft',
+    passport.authenticate('microsoft', { session: true })
+  );
   router.get('/microsoft/callback',
-    passport.authenticate('microsoft', { session: true, failureRedirect: '/?error=microsoft_failed' }),
+    passport.authenticate('microsoft', { session: false, failureRedirect: '/?error=microsoft_failed' }),
     authCtrl.oauthCallback
   );
 } else {
-  router.get('/microsoft',          (req, res) => res.redirect('/?error=microsoft_not_configured'));
-  router.get('/microsoft/callback', (req, res) => res.redirect('/?error=microsoft_not_configured'));
+  router.get('/microsoft',          (req, res) => res.redirect('/?error=provider_not_configured'));
+  router.get('/microsoft/callback', (req, res) => res.redirect('/?error=provider_not_configured'));
 }
 
 // ── Token management ──────────────────────────────────────────────────────────
