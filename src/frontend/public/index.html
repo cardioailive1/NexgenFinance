@@ -1,1642 +1,185 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>NexGen Finance — AI Financial Statements, Accounting, Audit, Market Analysis &amp; Trading Agent | Corverxis Technologies</title>
-<meta name="description" content="AI-powered financial statement generation, accounting, audit support and market analysis. Powered by NexGen Ultra."/>
-<link rel="preconnect" href="https://fonts.googleapis.com"/>
-<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500;600;700&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet"/>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --bg:#0F2645;--surface:#162E52;--panel:#1B3560;--lift:#1E3D6E;
-  --b:rgba(0,200,255,.1);--b2:rgba(0,200,255,.2);--b3:rgba(0,200,255,.35);
-  --text:#E8F2FB;--dim:#9BC0D8;--muted:#5A84A8;
-  --accent:#00C8FF;--accent2:#0099CC;--a2:rgba(0,200,255,.12);
-  --green:#00C896;--amber:#FFB830;--red:#FF5C5C;--violet:#9B79FF;
-  --mono:'DM Mono',monospace;--sans:'DM Sans',sans-serif;--display:'Playfair Display',serif;
-}
-html,body{height:100%;overflow:hidden}
-body{background:var(--bg);color:var(--text);font-family:var(--sans);font-size:14px;display:flex;flex-direction:column}
-::-webkit-scrollbar{width:6px;height:6px}
-::-webkit-scrollbar-thumb{background:rgba(0,200,255,.25);border-radius:3px}
-a{color:inherit}
-
-/* ── TOPBAR ── */
-.topbar{display:flex;align-items:center;gap:16px;padding:10px 20px;background:var(--surface);border-bottom:1px solid var(--b);flex-shrink:0;z-index:50}
-.nav-logo{width:30px;height:30px;border-radius:8px;background:var(--a2);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center}
-.nav-brand{font-family:var(--display);font-size:16px;font-weight:800;color:#fff;letter-spacing:-.3px}
-.nav-brand span{color:var(--accent)}
-.module-tabs{display:flex;gap:5px;margin-left:8px}
-.module-tab{padding:7px 14px;border-radius:7px;border:1px solid transparent;background:transparent;color:var(--dim);font-family:var(--mono);font-size:10.5px;cursor:pointer;transition:all .15s;display:flex;align-items:center;gap:6px;white-space:nowrap}
-.module-tab:hover{color:var(--text);background:var(--a2)}
-.module-tab.active{background:var(--a2);border-color:var(--b2);color:var(--accent);font-weight:700}
-.nav-btn{padding:6px 13px;border-radius:6px;border:1px solid var(--b2);background:transparent;color:var(--dim);font-family:var(--mono);font-size:9.5px;cursor:pointer;transition:all .15s;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
-.nav-btn:hover{border-color:var(--b3);color:var(--text)}
-.nav-btn.primary{background:var(--accent);color:var(--bg);border-color:var(--accent);font-weight:700}
-.nav-btn.primary:hover{opacity:.88}
-
-/* ── MAIN LAYOUT ── */
-.main{flex:1;display:flex;overflow:hidden}
-.sidebar{width:260px;background:var(--surface);border-right:1px solid var(--b);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
-.sb-section{padding:14px 16px}
-.sb-label{font-family:var(--mono);font-size:8.5px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
-.sb-item{display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:8px;cursor:pointer;transition:all .15s;font-size:12.5px;color:var(--dim);margin-bottom:2px}
-.sb-item:hover{background:var(--a2);color:var(--text)}
-.sb-item.active{background:var(--a2);border:1px solid var(--b2);color:var(--accent);font-weight:600}
-.sb-icon{width:18px;text-align:center;flex-shrink:0}
-
-.workspace{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
-.ws-header{padding:18px 28px;border-bottom:1px solid var(--b);flex-shrink:0;background:var(--surface)}
-.ws-title{font-family:var(--display);font-size:22px;font-weight:800;color:#fff;letter-spacing:-.3px}
-.ws-sub{font-family:var(--sans);font-size:12.5px;color:var(--muted);margin-top:3px}
-.ws-body{flex:1;overflow-y:auto;padding:28px}
-
-/* ── CARDS / FORMS ── */
-.panel{background:var(--surface);border:1px solid var(--b);border-radius:12px;padding:24px;margin-bottom:20px}
-.panel-title{font-size:15px;font-weight:700;color:#fff;margin-bottom:4px}
-.panel-sub{font-size:12px;color:var(--muted);margin-bottom:18px}
-.field-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px}
-.field-row.single{grid-template-columns:1fr}
-.field-row.three{grid-template-columns:1fr 1fr 1fr}
-.field-label{font-family:var(--mono);font-size:8.5px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;display:block}
-.field-input,.field-select,.field-textarea{width:100%;background:var(--panel);border:1px solid var(--b2);border-radius:7px;padding:10px 12px;font-family:var(--sans);font-size:13px;color:var(--text);outline:none;transition:border-color .15s}
-.field-input:focus,.field-select:focus,.field-textarea:focus{border-color:var(--accent)}
-.field-textarea{resize:vertical;min-height:80px;font-family:var(--mono);font-size:12px}
-.btn{padding:11px 22px;border-radius:8px;border:none;font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:8px}
-.btn-primary{background:var(--accent);color:var(--bg)}
-.btn-primary:hover{opacity:.88}
-.btn-primary:disabled{opacity:.4;cursor:not-allowed}
-.btn-ghost{background:transparent;border:1px solid var(--b2);color:var(--dim)}
-.btn-ghost:hover{border-color:var(--b3);color:var(--text)}
-
-/* ── STAT CARDS ── */
-.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:20px}
-.stat-card{background:var(--surface);border:1px solid var(--b);border-radius:10px;padding:18px}
-.stat-label{font-family:var(--mono);font-size:8.5px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
-.stat-value{font-size:26px;font-weight:800;color:#fff}
-.stat-delta{font-family:var(--mono);font-size:10.5px;margin-top:4px;display:flex;align-items:center;gap:4px}
-.stat-delta.up{color:var(--green)}
-.stat-delta.down{color:var(--red)}
-
-/* ── TABLE ── */
-.fin-table{width:100%;border-collapse:collapse;font-size:12.5px}
-.fin-table th{text-align:left;padding:10px 14px;background:var(--panel);color:var(--dim);font-family:var(--mono);font-size:9.5px;letter-spacing:1px;text-transform:uppercase;border-bottom:1px solid var(--b2)}
-.fin-table td{padding:10px 14px;border-bottom:1px solid var(--b);color:var(--text)}
-.fin-table tr:hover td{background:var(--a2)}
-.fin-table .num{text-align:right;font-family:var(--mono)}
-.fin-table .total-row td{font-weight:700;border-top:2px solid var(--b3);background:var(--panel)}
-
-/* ── OUTPUT PANEL ── */
-.output-panel{background:var(--surface);border:1px solid var(--b2);border-radius:12px;padding:0;overflow:hidden;margin-top:20px}
-.output-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;background:var(--panel);border-bottom:1px solid var(--b2)}
-.output-header-title{font-family:var(--mono);font-size:10px;color:var(--accent);letter-spacing:1.5px;text-transform:uppercase;display:flex;align-items:center;gap:8px}
-.output-body{padding:24px;max-height:600px;overflow-y:auto}
-.output-body h1,.output-body h2,.output-body h3{color:#fff;margin:18px 0 10px}
-.output-body h1{font-size:20px;border-bottom:1px solid var(--b2);padding-bottom:8px}
-.output-body h2{font-size:16px;color:var(--accent)}
-.output-body h3{font-size:13px}
-.output-body p{font-size:13px;line-height:1.75;color:var(--dim);margin-bottom:10px}
-.output-body ul,.output-body ol{margin:6px 0 12px 22px;color:var(--dim);font-size:13px;line-height:1.7}
-.output-body strong{color:#fff}
-.output-body table{width:100%;border-collapse:collapse;margin:14px 0;font-size:12.5px}
-.output-body th{background:var(--panel);padding:9px 12px;text-align:left;color:var(--accent);font-family:var(--mono);font-size:9.5px;border-bottom:1px solid var(--b2)}
-.output-body td{padding:9px 12px;border-bottom:1px solid var(--b);color:var(--text)}
-
-/* ── XAI BLOCK ── */
-.xai-block{margin-top:16px;padding:14px 16px;background:rgba(155,121,255,.07);border:1px solid rgba(155,121,255,.2);border-radius:10px;font-size:12.5px}
-.xai-header{font-family:var(--mono);font-size:9px;font-weight:700;color:var(--violet);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px;display:flex;align-items:center;gap:6px}
-.xai-block p{color:var(--dim);font-size:12.5px;line-height:1.75;margin:0 0 6px}
-.xai-block strong{color:var(--text)}
-
-/* ── BADGE / PILL ── */
-.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-family:var(--mono);font-size:9.5px;font-weight:700}
-.pill-green{background:rgba(0,200,150,.12);border:1px solid rgba(0,200,150,.3);color:var(--green)}
-.pill-amber{background:rgba(255,184,48,.12);border:1px solid rgba(255,184,48,.3);color:var(--amber)}
-.pill-red{background:rgba(255,92,92,.12);border:1px solid rgba(255,92,92,.3);color:var(--red)}
-.pill-accent{background:var(--a2);border:1px solid var(--b2);color:var(--accent)}
-
-/* ── AUTH WALL ── */
-#authWall{display:none;position:fixed;inset:0;background:rgba(15,38,69,.97);z-index:99999;align-items:flex-start;justify-content:center;backdrop-filter:blur(20px);padding:24px 20px;overflow-y:auto}
-.auth-inner{max-width:920px;width:100%;margin:auto}
-.auth-brand-header{display:flex;align-items:center;gap:14px;margin-bottom:24px}
-.auth-tabs{display:flex;background:var(--bg);border-radius:8px;padding:3px;margin-bottom:16px;border:1px solid var(--b)}
-.auth-tab{flex:1;padding:8px;border:none;border-radius:6px;background:transparent;color:var(--muted);font-family:var(--mono);font-size:9.5px;cursor:pointer;transition:all .15s}
-.auth-tab.active{background:var(--accent);color:var(--bg);font-weight:700}
-.auth-input{width:100%;background:var(--panel);border:1px solid var(--b2);border-radius:7px;padding:10px 13px;font-family:var(--mono);font-size:12px;color:var(--text);outline:none;margin-bottom:10px;box-sizing:border-box;transition:border-color .15s}
-.auth-input:focus{border-color:var(--b3)}
-.auth-label{font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:5px}
-
-/* ── UPGRADE / PRICING WALL ── */
-.upgrade-wall{display:none;position:fixed;inset:0;background:rgba(15,38,69,.95);z-index:99998;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(14px)}
-.upgrade-wall.on{display:flex}
-.plan-card{background:var(--surface);border:1px solid var(--b2);border-radius:12px;padding:22px;display:flex;flex-direction:column}
-.plan-card.popular{border-color:var(--accent);background:var(--panel);position:relative}
-
-/* ── TOAST ── */
-.toast{position:fixed;bottom:20px;right:20px;background:var(--panel);border:1px solid var(--b3);border-radius:8px;padding:10px 16px;font-family:var(--mono);font-size:12px;color:var(--accent);z-index:999999;opacity:0;transition:opacity .25s;pointer-events:none;max-width:340px}
-
-/* ── MFA ── */
-#nxMFAWall,#nxMFASettings{display:none;position:fixed;inset:0;background:rgba(15,38,69,.95);z-index:1000000;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(14px)}
-
-@media(max-width:900px){
-  .sidebar{display:none}
-  .module-tabs{display:none}
-  .field-row{grid-template-columns:1fr}
-}
-</style>
-</head>
-<body>
-
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- TOPBAR                                                      -->
-<!-- ══════════════════════════════════════════════════════════ -->
-<div class="topbar">
-  <div class="nav-logo">
-    <svg width="18" height="18" viewBox="0 0 28 28" fill="none">
-      <polygon points="14,2 24,7.5 24,20.5 14,26 4,20.5 4,7.5" stroke="#00C8FF" stroke-width="1.5" fill="none"/>
-      <polygon points="14,7 20,10.5 20,17.5 14,21 8,17.5 8,10.5" stroke="#00C8FF" stroke-width="1" fill="none" opacity=".6"/>
-      <circle cx="14" cy="14" r="2.5" fill="#00C8FF"/>
-    </svg>
-  </div>
-  <div class="nav-brand">NexGen <span>Finance</span></div>
-
-  <div class="module-tabs" id="moduleTabs">
-    <button class="module-tab active" id="tabStatements" onclick="setModule('statements')">&#x1F4C4; Financial Statements</button>
-    <button class="module-tab" id="tabAccounting" onclick="setModule('accounting')">&#x1F4D2; Accounting</button>
-    <button class="module-tab" id="tabAudit" onclick="setModule('audit')">&#x1F50D; Audit</button>
-    <button class="module-tab" id="tabMarket" onclick="setModule('market')">&#x1F4C8; Market Analysis</button>
-    <button class="module-tab" id="tabTrading" onclick="setModule('trading')" style="border-color:rgba(255,184,48,.25);color:#FFB830">&#x1F4B9; Trading Agent <span style="font-size:7px;padding:1px 5px;background:rgba(255,184,48,.15);border:1px solid rgba(255,184,48,.3);border-radius:10px;color:#FFB830;margin-left:2px;vertical-align:middle">LIVE</span></button>
-  </div>
-
-  <div style="display:flex;align-items:center;gap:7px;margin-left:auto">
-    <span id="trialCountNav" style="font-family:var(--mono);font-size:9px;padding:3px 10px;border-radius:10px;background:var(--a2);border:1px solid var(--b2);color:var(--accent);display:none"></span>
-    <button class="nav-btn" onclick="document.getElementById('upgradeWall').classList.add('on')">&#x1F4B3; Pricing</button>
-    <button id="mfaNavBtn" onclick="document.getElementById('nxMFASettings').style.display='flex';nxMFALoadStatus();" style="display:none;padding:6px 12px;background:transparent;border:1px solid var(--b2);color:var(--accent);border-radius:6px;font-family:var(--mono);font-size:9px;cursor:pointer">&#x1F512; MFA</button>
-    <button id="signInBtn" onclick="showAuth('up')" class="nav-btn primary">Get Access</button>
-    <button id="userPill" onclick="signOut()" style="display:none;padding:6px 13px;background:transparent;border:1px solid var(--b2);color:var(--accent);border-radius:6px;font-family:var(--mono);font-size:9px;cursor:pointer" title="Click to sign out"></button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- MAIN LAYOUT                                                 -->
-<!-- ══════════════════════════════════════════════════════════ -->
-<div class="main">
-
-  <!-- ── SIDEBAR ── -->
-  <div class="sidebar" id="sidebar">
-
-    <div class="sb-section" id="sbStatements">
-      <div class="sb-label">Financial Statements</div>
-      <div class="sb-item active" onclick="setReportType('statements','income')"><span class="sb-icon">&#x1F4B5;</span> Income Statement</div>
-      <div class="sb-item" onclick="setReportType('statements','balance')"><span class="sb-icon">&#x2696;&#xFE0F;</span> Balance Sheet</div>
-      <div class="sb-item" onclick="setReportType('statements','cashflow')"><span class="sb-icon">&#x1F4B8;</span> Cash Flow Statement</div>
-      <div class="sb-item" onclick="setReportType('statements','equity')"><span class="sb-icon">&#x1F4C8;</span> Statement of Equity</div>
-      <div class="sb-item" onclick="setReportType('statements','annual')"><span class="sb-icon">&#x1F4DA;</span> Full Annual Report</div>
-    </div>
-
-    <div class="sb-section" id="sbAccounting" style="display:none">
-      <div class="sb-label">Accounting</div>
-      <div class="sb-item active" onclick="setReportType('accounting','journal')"><span class="sb-icon">&#x1F4D3;</span> Journal Entries</div>
-      <div class="sb-item" onclick="setReportType('accounting','ledger')"><span class="sb-icon">&#x1F4D6;</span> General Ledger</div>
-      <div class="sb-item" onclick="setReportType('accounting','reconcile')"><span class="sb-icon">&#x1F501;</span> Bank Reconciliation</div>
-      <div class="sb-item" onclick="setReportType('accounting','depreciation')"><span class="sb-icon">&#x1F4C9;</span> Depreciation Schedule</div>
-      <div class="sb-item" onclick="setReportType('accounting','payroll')"><span class="sb-icon">&#x1F465;</span> Payroll Summary</div>
-      <div class="sb-item" onclick="setReportType('accounting','tax')"><span class="sb-icon">&#x1F4CB;</span> Tax Provision</div>
-    </div>
-
-    <div class="sb-section" id="sbAudit" style="display:none">
-      <div class="sb-label">Audit</div>
-      <div class="sb-item active" onclick="setReportType('audit','riskassess')"><span class="sb-icon">&#x26A0;&#xFE0F;</span> Risk Assessment</div>
-      <div class="sb-item" onclick="setReportType('audit','controls')"><span class="sb-icon">&#x1F6E1;&#xFE0F;</span> Internal Controls Review</div>
-      <div class="sb-item" onclick="setReportType('audit','substantive')"><span class="sb-icon">&#x1F50E;</span> Substantive Testing Plan</div>
-      <div class="sb-item" onclick="setReportType('audit','findings')"><span class="sb-icon">&#x1F4DD;</span> Audit Findings Report</div>
-      <div class="sb-item" onclick="setReportType('audit','opinion')"><span class="sb-icon">&#x2696;&#xFE0F;</span> Audit Opinion Draft</div>
-      <div class="sb-item" onclick="setReportType('audit','compliance')"><span class="sb-icon">&#x2705;</span> Compliance Checklist</div>
-    </div>
-
-    <div class="sb-section" id="sbMarket" style="display:none">
-      <div class="sb-label">Market Analysis</div>
-      <div class="sb-item active" onclick="setReportType('market','company')"><span class="sb-icon">&#x1F3E2;</span> Company Valuation</div>
-      <div class="sb-item" onclick="setReportType('market','ratio')"><span class="sb-icon">&#x1F4CA;</span> Ratio Analysis</div>
-      <div class="sb-item" onclick="setReportType('market','competitor')"><span class="sb-icon">&#x2694;&#xFE0F;</span> Competitor Benchmarking</div>
-      <div class="sb-item" onclick="setReportType('market','sector')"><span class="sb-icon">&#x1F30D;</span> Sector & Industry Report</div>
-      <div class="sb-item" onclick="setReportType('market','investment')"><span class="sb-icon">&#x1F4B0;</span> Investment Memo</div>
-      <div class="sb-item" onclick="setReportType('market','forecast')"><span class="sb-icon">&#x1F52E;</span> Financial Forecast</div>
-    </div>
-
-    <div class="sb-section" id="sbTrading" style="display:none">
-      <div class="sb-label" style="color:#FFB830">Trading Agent — Live</div>
-      <div class="sb-item active" onclick="setReportType('trading','equityforecast')"><span class="sb-icon">&#x1F4C8;</span> Equity &amp; Index Forecast</div>
-      <div class="sb-item" onclick="setReportType('trading','fxoutlook')"><span class="sb-icon">&#x1F4B1;</span> FX / Currency Outlook</div>
-      <div class="sb-item" onclick="setReportType('trading','commodity')"><span class="sb-icon">&#x1FA99;</span> Commodity Forecast</div>
-      <div class="sb-item" onclick="setReportType('trading','sentiment')"><span class="sb-icon">&#x1F9E0;</span> Market Sentiment Scan</div>
-      <div class="sb-item" onclick="setReportType('trading','tradesetup')"><span class="sb-icon">&#x1F3AF;</span> Trade Setup Generator</div>
-      <div class="sb-item" onclick="setReportType('trading','riskscanner')"><span class="sb-icon">&#x1F6E1;&#xFE0F;</span> Portfolio Risk Scanner</div>
-    </div>
-
-    <div style="margin-top:auto;padding:16px;border-top:1px solid var(--b)">
-      <div style="font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px">Powered By</div>
-      <div style="display:flex;align-items:center;gap:8px;padding:9px 11px;background:var(--a2);border:1px solid var(--b2);border-radius:8px">
-        <span style="font-size:14px">&#x1F9EC;</span>
-        <div>
-          <div style="font-size:11px;font-weight:700;color:#fff">NexGen Ultra</div>
-          <div style="font-family:var(--mono);font-size:7.5px;color:var(--muted)">Corverxis Technologies</div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ── WORKSPACE ── -->
-  <div class="workspace">
-    <div class="ws-header">
-      <div class="ws-title" id="wsTitle">Income Statement Generator</div>
-      <div class="ws-sub" id="wsSub">Generate a GAAP/IFRS-compliant income statement from your financial data</div>
-    </div>
-
-    <div class="ws-body" id="wsBody">
-      <!-- Dynamic content injected here -->
-    </div>
-  </div>
-
-</div><!-- /main -->
-
-<div class="toast" id="toast"></div>
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- AUTH WALL                                                   -->
-<!-- ══════════════════════════════════════════════════════════ -->
-<div id="authWall">
-  <div class="auth-inner">
-
-    <!-- Brand header -->
-    <div class="auth-brand-header">
-      <svg width="40" height="40" viewBox="0 0 28 28" fill="none">
-        <polygon points="14,2 24,7.5 24,20.5 14,26 4,20.5 4,7.5" stroke="#00C8FF" stroke-width="1.5" fill="none"/>
-        <polygon points="14,7 20,10.5 20,17.5 14,21 8,17.5 8,10.5" stroke="#00C8FF" stroke-width="1" fill="none" opacity=".6"/>
-        <circle cx="14" cy="14" r="2.5" fill="#00C8FF"/>
-      </svg>
-      <div>
-        <div style="font-family:var(--display);font-size:22px;font-weight:800;color:#fff;letter-spacing:-.5px">NexGen <span style="color:var(--accent)">Finance</span></div>
-        <div style="font-family:var(--mono);font-size:8.5px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-top:3px">Corverxis Technologies</div>
-      </div>
-    </div>
-
-    <div style="display:flex;gap:40px;align-items:flex-start;flex-wrap:wrap">
-
-      <!-- Left: highlights -->
-      <div id="authHighlights" style="flex:1;min-width:300px">
-        <div style="font-size:13px;color:var(--dim);line-height:1.8;margin-bottom:22px">AI-powered financial statements, accounting, audit support and market analysis &mdash; all generated by NexGen Ultra in seconds, not days.</div>
-
-        <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px">
-          <div style="display:flex;align-items:flex-start;gap:12px;padding:13px;background:var(--a2);border:1px solid var(--b2);border-radius:10px">
-            <div style="font-size:20px;flex-shrink:0">&#x1F4C4;</div>
-            <div><div style="font-size:12.5px;font-weight:700;color:#fff;margin-bottom:3px">GAAP &amp; IFRS Financial Statements</div><div style="font-size:11.5px;color:var(--muted);line-height:1.6">Income statements, balance sheets, cash flow &amp; equity statements</div></div>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:12px;padding:13px;background:var(--a2);border:1px solid var(--b2);border-radius:10px">
-            <div style="font-size:20px;flex-shrink:0">&#x1F4D2;</div>
-            <div><div style="font-size:12.5px;font-weight:700;color:#fff;margin-bottom:3px">Full Accounting Suite</div><div style="font-size:11.5px;color:var(--muted);line-height:1.6">Journal entries, ledgers, reconciliation, depreciation &amp; tax</div></div>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:12px;padding:13px;background:var(--a2);border:1px solid var(--b2);border-radius:10px">
-            <div style="font-size:20px;flex-shrink:0">&#x1F50D;</div>
-            <div><div style="font-size:12.5px;font-weight:700;color:#fff;margin-bottom:3px">Audit Support Tools</div><div style="font-size:11.5px;color:var(--muted);line-height:1.6">Risk assessment, controls review, findings &amp; opinion drafting</div></div>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:12px;padding:13px;background:var(--a2);border:1px solid var(--b2);border-radius:10px">
-            <div style="font-size:20px;flex-shrink:0">&#x1F4C8;</div>
-            <div><div style="font-size:12.5px;font-weight:700;color:#fff;margin-bottom:3px">Market &amp; Investment Analysis</div><div style="font-size:11.5px;color:var(--muted);line-height:1.6">Valuation, ratio analysis, competitor benchmarking &amp; forecasts</div></div>
-          </div>
-          <div style="display:flex;align-items:flex-start;gap:12px;padding:13px;background:rgba(255,184,48,.07);border:1px solid rgba(255,184,48,.25);border-radius:10px">
-            <div style="font-size:20px;flex-shrink:0">&#x1F4B9;</div>
-            <div><div style="font-size:12.5px;font-weight:700;color:#FFB830;margin-bottom:3px">Trading Agent <span style="font-size:8px;padding:1px 6px;background:rgba(255,184,48,.15);border:1px solid rgba(255,184,48,.3);border-radius:8px;vertical-align:middle">LIVE DATA</span></div><div style="font-size:11.5px;color:var(--muted);line-height:1.6">Live market forecasts for equities, FX, commodities &amp; trade setups</div></div>
-          </div>
-        </div>
-
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-          <div style="background:var(--a2);border:1px solid var(--b2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:17px;font-weight:800;color:var(--accent)">5</div><div style="font-family:var(--mono);font-size:7px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px">Modules</div></div>
-          <div style="background:var(--a2);border:1px solid var(--b2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:17px;font-weight:800;color:var(--accent)">10</div><div style="font-family:var(--mono);font-size:7px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px">Free Reports</div></div>
-          <div style="background:var(--a2);border:1px solid var(--b2);border-radius:8px;padding:10px;text-align:center"><div style="font-size:17px;font-weight:800;color:var(--accent)">SOC2</div><div style="font-family:var(--mono);font-size:7px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-top:2px">Compliant</div></div>
-        </div>
-      </div>
-
-      <!-- Right: OAuth sign-in card -->
-      <div style="background:var(--panel);border:1px solid var(--b3);border-radius:14px;padding:28px;width:100%;max-width:380px;flex-shrink:0">
-        <div style="font-family:var(--display);font-size:18px;font-weight:800;color:#fff;margin-bottom:6px">Sign in to continue</div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:24px;line-height:1.6">Choose your provider. A free account with 10 reports is created on first sign-in.</div>
-
-        <a href="/api/auth/google" style="display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:13px;border-radius:10px;background:#4285F4;color:#fff;font-size:13.5px;font-weight:600;text-decoration:none;margin-bottom:11px;border:none;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
-          <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFF" d="M44.5 20H24v8.5h11.8C34.7 33.9 29.9 37 24 37c-7.2 0-13-5.8-13-13s5.8-13 13-13c3.1 0 5.9 1.1 8.1 2.9l6.4-6.4C34.6 5.1 29.6 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21c10.5 0 20-7.9 20-21 0-1.3-.2-2.7-.5-4z"/></svg>
-          Continue with Google
-        </a>
-
-        <a href="/api/auth/github" style="display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:13px;border-radius:10px;background:#24292F;color:#fff;font-size:13.5px;font-weight:600;text-decoration:none;margin-bottom:11px;border:none;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
-          Continue with GitHub
-        </a>
-
-        <a href="/api/auth/microsoft" style="display:flex;align-items:center;justify-content:center;gap:12px;width:100%;padding:13px;border-radius:10px;background:#00A4EF;color:#fff;font-size:13.5px;font-weight:600;text-decoration:none;border:none;cursor:pointer;transition:opacity .15s" onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
-          <svg width="18" height="18" viewBox="0 0 23 23" fill="white"><path d="M0 0h11v11H0zm12 0h11v11H12zM0 12h11v11H0zm12 0h11v11H12z"/></svg>
-          Continue with Microsoft
-        </a>
-
-        <div style="margin-top:18px;text-align:center;font-family:var(--mono);font-size:9px;color:var(--muted)">
-          SOC 2 &bull; GDPR &bull; CCPA compliant &nbsp;&middot;&nbsp; No credit card required
-        </div>
-      </div>
-        </div>
-
-        <!-- Password Reset -->
-        <div id="formReset" style="display:none">
-          <div style="font-family:var(--mono);font-size:9px;color:var(--dim);margin-bottom:14px;line-height:1.7">Enter your new password below.</div>
-          <input id="newPass" type="password" class="auth-input" placeholder="New password (min. 6 characters)"/>
-          <button onclick="updatePasswordNow()" class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:10px">Set New Password &#x2192;</button>
-          <div style="text-align:center"><span onclick="authTab('in')" style="font-family:var(--mono);font-size:9px;color:var(--muted);cursor:pointer">&larr; Back to Sign In</span></div>
-        </div>
-
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- UPGRADE / PRICING WALL                                      -->
-<!-- ══════════════════════════════════════════════════════════ -->
-<div class="upgrade-wall" id="upgradeWall">
-  <div style="max-width:980px;width:100%;max-height:90vh;overflow-y:auto;padding:8px">
-    <div style="text-align:center;margin-bottom:8px">
-      <button onclick="document.getElementById('upgradeWall').classList.remove('on')" style="position:absolute;top:24px;right:24px;width:34px;height:34px;border-radius:8px;background:var(--a2);border:1px solid var(--b2);color:var(--accent);font-size:15px;cursor:pointer">&#x2715;</button>
-      <div style="font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px">Pricing</div>
-      <h2 style="font-family:var(--display);font-size:30px;font-weight:800;color:#fff;margin-bottom:8px">Choose Your Plan</h2>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:32px">All plans include NexGen Ultra &mdash; cancel anytime</p>
-    </div>
-
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px">
-
-      <div class="plan-card">
-        <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px">Free</div>
-        <div style="font-size:26px;font-weight:800;color:var(--accent);margin-bottom:2px">$0<span style="font-size:11px;font-weight:400;color:var(--muted)">/mo</span></div>
-        <div style="font-family:var(--mono);font-size:8px;color:var(--muted);margin-bottom:14px">no credit card</div>
-        <ul style="list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:18px;flex:1">
-          <li style="font-size:11.5px;color:var(--dim);display:flex;gap:6px"><span style="color:var(--green)">&#x2713;</span>3 reports/month</li>
-          <li style="font-size:11.5px;color:var(--dim);display:flex;gap:6px"><span style="color:var(--green)">&#x2713;</span>Income statements</li>
-          <li style="font-size:11.5px;color:var(--dim);display:flex;gap:6px"><span style="color:var(--green)">&#x2713;</span>PDF export</li>
-        </ul>
-        <button onclick="document.getElementById('upgradeWall').classList.remove('on');showAuth('up')" class="btn btn-ghost" style="width:100%;justify-content:center">Get Started</button>
-      </div>
-
-      <div class="plan-card">
-        <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px">Starter</div>
-        <div style="font-size:26px;font-weight:800;color:var(--accent);margin-bottom:2px">$29<span style="font-size:11px;font-weight:400;color:var(--muted)">/mo</span></div>
-        <div style="font-family:var(--mono);font-size:8px;color:var(--muted);margin-bottom:14px">cancel anytime</div>
-        <ul style="list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:18px;flex:1">
-          <li style="font-size:11.5px;color:var(--dim);display:flex;gap:6px"><span style="color:var(--green)">&#x2713;</span>25 reports/month</li>
-          <li style="font-size:11.5px;color:var(--dim);display:flex;gap:6px"><span style="color:var(--green)">&#x2713;</span>All financial statements</li>
-          <li style="font-size:11.5px;color:var(--dim);display:flex;gap:6px"><span style="color:var(--green)">&#x2713;</span>Basic accounting tools</li>
-          <li style="font-size:11.5px;color:var(--dim);display:flex;gap:6px"><span style="color:var(--green)">&#x2713;</span>PDF + Word export</li>
-        </ul>
-        <button onclick="upgradeTo('starter')" class="btn btn-ghost" style="width:100%;justify-content:center">Subscribe</button>
-      </div>
-
-      <div class="plan-card popular">
-        <div style="position:absolute;top:-11px;left:50%;transform:translateX(-50%);background:var(--accent);color:var(--bg);font-family:var(--mono);font-size:8px;font-weight:700;padding:3px 12px;border-radius:20px;letter-spacing:1px;white-space:nowrap">&#x2605; MOST POPULAR</div>
-        <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px">Professional</div>
-        <div style="font-size:26px;font-weight:800;color:var(--accent);margin-bottom:2px">$79<span style="font-size:11px;font-weight:400;color:var(--muted)">/mo</span></div>
-        <div style="font-family:var(--mono);font-size:8px;color:var(--muted);margin-bottom:14px">cancel anytime</div>
-        <ul style="list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:18px;flex:1">
-          <li style="font-size:11.5px;color:var(--dim);display:flex;gap:6px"><span style="color:var(--green)">&#x2713;</span>Unlimited reports</li>
-          <li style="font-size:11.5px;color:var(--dim);display:flex;gap:6px"><span style="color:var(--green)">&#x2713;</span>Full accounting + audit suite</li>
-          <li style="font-size:11.5px;color:var(--dim);display:flex;gap:6px"><span style="color:var(--green)">&#x2713;</span>Market analysis tools</li>
-          <li style="font-size:11.5px;color:var(--dim);display:flex;gap:6px"><span style="color:var(--green)">&#x2713;</span>Priority support</li>
-        </ul>
-        <button onclick="upgradeTo('pro')" class="btn btn-primary" style="width:100%;justify-content:center">Subscribe</button>
-      </div>
-
-      <div class="plan-card">
-        <div style="font-size:13px;font-weight:700;color:#fff;margin-bottom:4px">Enterprise</div>
-        <div style="font-size:26px;font-weight:800;color:var(--accent);margin-bottom:2px">Custom</div>
-        <div style="font-family:var(--mono);font-size:8px;color:var(--muted);margin-bottom:14px">tailored contract</div>
-        <ul style="list-style:none;display:flex;flex-direction:column;gap:9px;margin-bottom:18px;flex:1">
-          <li style="font-size:11.5px;color:var(--dim);display:flex;gap:6px"><span style="color:var(--green)">&#x2713;</span>Everything in Pro</li>
-          <li style="font-size:11.5px;color:var(--dim);display:flex;gap:6px"><span style="color:var(--green)">&#x2713;</span>Multi-entity consolidation</li>
-          <li style="font-size:11.5px;color:var(--dim);display:flex;gap:6px"><span style="color:var(--green)">&#x2713;</span>Dedicated account manager</li>
-          <li style="font-size:11.5px;color:var(--dim);display:flex;gap:6px"><span style="color:var(--green)">&#x2713;</span>SSO + custom integrations</li>
-        </ul>
-        <button onclick="window.location.href='mailto:support@corverxis.com?subject=NexGen Finance Enterprise'" class="btn btn-ghost" style="width:100%;justify-content:center">Contact Sales</button>
-      </div>
-
-    </div>
-  </div>
-</div>
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- MFA CHALLENGE WALL (shown on sign-in if MFA enabled)        -->
-<!-- ══════════════════════════════════════════════════════════ -->
-<div id="nxMFAWall">
-  <div style="background:var(--panel);border:1px solid var(--b3);border-radius:14px;padding:36px;max-width:380px;width:100%;text-align:center">
-    <div style="width:52px;height:52px;border-radius:50%;background:var(--a2);border:1px solid var(--b2);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 18px">&#x1F512;</div>
-    <div style="font-family:var(--display);font-size:19px;font-weight:800;color:#fff;margin-bottom:8px">Two-Factor Verification</div>
-    <div style="font-size:12.5px;color:var(--muted);margin-bottom:22px;line-height:1.7">Enter the 6-digit code from your authenticator app</div>
-    <input id="nxMFACode" type="text" inputmode="numeric" maxlength="6" placeholder="000000" style="width:100%;background:var(--bg);border:1px solid var(--b2);border-radius:8px;padding:14px;font-family:var(--mono);font-size:22px;letter-spacing:8px;text-align:center;color:var(--text);outline:none;margin-bottom:14px;box-sizing:border-box"/>
-    <div id="nxMFAErr" style="display:none;font-family:var(--mono);font-size:10px;color:var(--red);margin-bottom:12px"></div>
-    <button id="nxMFAVerifyBtn" onclick="nxMFAVerify()" class="btn btn-primary" style="width:100%;justify-content:center;margin-bottom:10px">Verify &#x2192;</button>
-    <div onclick="nxMFACancel()" style="font-family:var(--mono);font-size:9.5px;color:var(--muted);cursor:pointer">Cancel and sign out</div>
-  </div>
-</div>
-
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- MFA SETTINGS PANEL                                          -->
-<!-- ══════════════════════════════════════════════════════════ -->
-<div id="nxMFASettings">
-  <div style="background:var(--panel);border:1px solid var(--b3);border-radius:14px;padding:32px;max-width:420px;width:100%;position:relative">
-    <button onclick="document.getElementById('nxMFASettings').style.display='none'" style="position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:7px;background:var(--a2);border:1px solid var(--b2);color:var(--accent);font-size:14px;cursor:pointer">&#x2715;</button>
-
-    <div style="font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Security</div>
-    <div style="font-family:var(--display);font-size:19px;font-weight:800;color:#fff;margin-bottom:20px">Two-Factor Authentication</div>
-
-    <div id="nxMFAStatusView">
-      <div id="nxMFAStatusLoading" style="font-family:var(--mono);font-size:11px;color:var(--muted)">Loading status&hellip;</div>
-
-      <div id="nxMFAOffView" style="display:none">
-        <p style="font-size:12.5px;color:var(--dim);line-height:1.7;margin-bottom:18px">Add an extra layer of security. Once enabled, you'll need a code from Google Authenticator or Authy every time you sign in.</p>
-        <button onclick="nxMFAStartEnroll()" class="btn btn-primary" style="width:100%;justify-content:center">Enable MFA &#x2192;</button>
-      </div>
-
-      <div id="nxMFAOnView" style="display:none">
-        <div class="pill pill-green" style="margin-bottom:16px">&#x2713; MFA Enabled</div>
-        <p style="font-size:12.5px;color:var(--dim);line-height:1.7;margin-bottom:18px">Your account is protected with two-factor authentication.</p>
-        <button onclick="nxMFADisable()" class="btn btn-ghost" style="width:100%;justify-content:center;color:var(--red);border-color:rgba(255,92,92,.3)">Disable MFA</button>
-      </div>
-    </div>
-
-    <div id="nxMFAEnrollView" style="display:none">
-      <p style="font-size:12px;color:var(--dim);margin-bottom:14px">Scan this QR code with Google Authenticator or Authy:</p>
-      <div id="nxMFAQRBox" style="background:#fff;border-radius:10px;padding:16px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;min-height:160px"></div>
-      <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:6px">Or enter this code manually:</div>
-      <div id="nxMFASecret" style="font-family:var(--mono);font-size:11px;color:var(--accent);background:var(--bg);padding:8px 12px;border-radius:6px;margin-bottom:16px;word-break:break-all"></div>
-      <input id="nxMFAEnrollCode" type="text" inputmode="numeric" maxlength="6" placeholder="Enter 6-digit code" style="width:100%;background:var(--bg);border:1px solid var(--b2);border-radius:8px;padding:12px;font-family:var(--mono);font-size:16px;letter-spacing:4px;text-align:center;color:var(--text);outline:none;margin-bottom:12px;box-sizing:border-box"/>
-      <div id="nxMFAEnrollErr" style="display:none;font-family:var(--mono);font-size:10px;color:var(--red);margin-bottom:10px"></div>
-      <button onclick="nxMFAConfirmEnroll()" class="btn btn-primary" style="width:100%;justify-content:center">Confirm &amp; Enable &#x2192;</button>
-    </div>
-
-  </div>
-</div>
-<script>
 'use strict';
-// ══════════════════════════════════════════════════════════════════
-// CONFIG
-// ══════════════════════════════════════════════════════════════════
-var KEY = null; // Key managed server-side
+require('dotenv').config();
+const express      = require('express');
+const cookieParser = require('cookie-parser');
+const session      = require('express-session');
+const passport     = require('passport');
+const path         = require('path');
+const cron         = require('node-cron');
 
-var API_BASE = window.location.origin;
+const config       = require('./config');
+const logger       = require('./utils/logger');
+const prisma       = require('./config/prisma');
+const auditService = require('./services/auditService');
+const { configurePassport } = require('./config/passport');
 
+const {
+  helmetMiddleware,
+  corsMiddleware,
+  requestId,
+  accessLog,
+  complianceHeaders,
+  compression,
+} = require('./middleware/security');
+const { globalLimiter } = require('./middleware/rateLimit');
 
+// ── Routes ────────────────────────────────────────────────────────────────────
+const authRoutes    = require('./routes/auth');
+const reportRoutes  = require('./routes/reports');
+const userRoutes    = require('./routes/users');
+const privacyRoutes = require('./routes/privacy');
 
-var _user = null;
-var _module = 'statements';
-var _reportType = 'income';
-var _generating = false;
+const app = express();
 
-// ══════════════════════════════════════════════════════════════════
-// REPORT DEFINITIONS — title, sub, fields, prompt template
-// ══════════════════════════════════════════════════════════════════
-var REPORTS = {
-  // ── FINANCIAL STATEMENTS ──────────────────────────────────────
-  income: {
-    title:'Income Statement Generator', sub:'Generate a GAAP/IFRS-compliant income statement from your financial data',
-    fields:[
-      {id:'company', label:'Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'period', label:'Reporting Period', type:'text', placeholder:'FY2025 (Jan 1 - Dec 31)', span:'half'},
-      {id:'standard', label:'Accounting Standard', type:'select', options:['GAAP (US)','IFRS','UK GAAP'], span:'half'},
-      {id:'revenue', label:'Total Revenue ($)', type:'text', placeholder:'5,200,000', span:'half'},
-      {id:'cogs', label:'Cost of Goods Sold ($)', type:'text', placeholder:'2,100,000', span:'half'},
-      {id:'opex', label:'Operating Expenses ($)', type:'text', placeholder:'1,400,000', span:'half'},
-      {id:'other', label:'Other Income/Expenses ($)', type:'text', placeholder:'-50,000 (interest expense)', span:'half'},
-      {id:'tax', label:'Tax Rate (%)', type:'text', placeholder:'21', span:'half'},
-      {id:'notes', label:'Additional Notes', type:'textarea', placeholder:'Any context: one-off items, segment breakdowns, prior year comparison...', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'Generate a complete, professionally formatted Income Statement for "'+d.company+'" for the period '+d.period+', prepared under '+d.standard+'. '+
-      'Financial inputs: Total Revenue $'+d.revenue+', COGS $'+d.cogs+', Operating Expenses $'+d.opex+', Other Income/Expenses $'+d.other+', Tax Rate '+d.tax+'%. '+
-      (d.notes ? 'Additional context: '+d.notes+'. ' : '') +
-      'Structure the statement with proper line items: Revenue, COGS, Gross Profit (with margin %), Operating Expenses (broken into reasonable categories like SG&A, R&D, Marketing), Operating Income/EBIT, Other Income/Expenses, Income Before Tax, Tax Provision, Net Income (with net margin %). '+
-      'Present as a clean markdown table with prior-period comparison columns where reasonable to estimate, followed by a brief management commentary section analysing margins, cost trends and profitability drivers. Use professional accounting terminology and proper $ formatting with commas.';
-    }
-  },
-  balance: {
-    title:'Balance Sheet Generator', sub:'Generate a classified balance sheet with assets, liabilities and equity',
-    fields:[
-      {id:'company', label:'Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'asof', label:'As-Of Date', type:'text', placeholder:'December 31, 2025', span:'half'},
-      {id:'standard', label:'Accounting Standard', type:'select', options:['GAAP (US)','IFRS','UK GAAP'], span:'half'},
-      {id:'cash', label:'Cash & Equivalents ($)', type:'text', placeholder:'850,000', span:'half'},
-      {id:'ar', label:'Accounts Receivable ($)', type:'text', placeholder:'620,000', span:'half'},
-      {id:'inventory', label:'Inventory ($)', type:'text', placeholder:'410,000', span:'half'},
-      {id:'ppe', label:'Property, Plant & Equipment ($)', type:'text', placeholder:'2,100,000', span:'half'},
-      {id:'ap', label:'Accounts Payable ($)', type:'text', placeholder:'380,000', span:'half'},
-      {id:'debt', label:'Long-Term Debt ($)', type:'text', placeholder:'1,200,000', span:'half'},
-      {id:'equity', label:'Shareholders Equity ($)', type:'text', placeholder:'2,400,000', span:'half'},
-      {id:'notes', label:'Additional Notes', type:'textarea', placeholder:'Any context: contingent liabilities, recent financing, intangibles...', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'Generate a complete, classified Balance Sheet for "'+d.company+'" as of '+d.asof+', prepared under '+d.standard+'. '+
-      'Inputs: Cash $'+d.cash+', AR $'+d.ar+', Inventory $'+d.inventory+', PP&E $'+d.ppe+', AP $'+d.ap+', Long-Term Debt $'+d.debt+', Shareholders Equity $'+d.equity+'. '+
-      (d.notes ? 'Context: '+d.notes+'. ' : '') +
-      'Structure with proper classification: Current Assets (Cash, AR, Inventory, Prepaid Expenses), Non-Current Assets (PP&E net of depreciation, Intangibles, Goodwill), Total Assets; Current Liabilities (AP, Accrued Expenses, Current Debt), Non-Current Liabilities (Long-Term Debt, Deferred Tax), Total Liabilities; Shareholders Equity (Common Stock, Retained Earnings, APIC), Total Liabilities + Equity (must balance to Total Assets). '+
-      'Present as a clean markdown table, calculate and show key ratios (Current Ratio, Quick Ratio, Debt-to-Equity, Working Capital), followed by a brief liquidity and solvency commentary.';
-    }
-  },
-  cashflow: {
-    title:'Cash Flow Statement Generator', sub:'Generate a statement of cash flows using the indirect method',
-    fields:[
-      {id:'company', label:'Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'period', label:'Reporting Period', type:'text', placeholder:'FY2025', span:'half'},
-      {id:'method', label:'Method', type:'select', options:['Indirect Method','Direct Method'], span:'half'},
-      {id:'netincome', label:'Net Income ($)', type:'text', placeholder:'780,000', span:'half'},
-      {id:'depreciation', label:'Depreciation & Amortisation ($)', type:'text', placeholder:'210,000', span:'half'},
-      {id:'wc_change', label:'Working Capital Change ($)', type:'text', placeholder:'-95,000', span:'half'},
-      {id:'capex', label:'Capital Expenditures ($)', type:'text', placeholder:'-340,000', span:'half'},
-      {id:'financing', label:'Net Financing Activities ($)', type:'text', placeholder:'-150,000 (debt repayment)', span:'half'},
-      {id:'beginning_cash', label:'Beginning Cash Balance ($)', type:'text', placeholder:'620,000', span:'half'},
-      {id:'notes', label:'Additional Notes', type:'textarea', placeholder:'Any context: major investments, financing events...', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'Generate a complete Statement of Cash Flows for "'+d.company+'" for '+d.period+' using the '+d.method+'. '+
-      'Inputs: Net Income $'+d.netincome+', Depreciation & Amortisation $'+d.depreciation+', Working Capital Change $'+d.wc_change+', CapEx $'+d.capex+', Net Financing Activities $'+d.financing+', Beginning Cash $'+d.beginning_cash+'. '+
-      (d.notes ? 'Context: '+d.notes+'. ' : '') +
-      'Structure into three sections: Operating Activities (Net Income + Depreciation +/- Working Capital changes = Net Cash from Operations), Investing Activities (CapEx, acquisitions, asset sales = Net Cash from Investing), Financing Activities (debt issuance/repayment, equity, dividends = Net Cash from Financing). Calculate Net Change in Cash, then Ending Cash Balance. '+
-      'Present as a markdown table followed by a Free Cash Flow calculation (Operating Cash Flow - CapEx) and a brief commentary on cash generation quality and liquidity trends.';
-    }
-  },
-  equity: {
-    title:'Statement of Stockholders Equity', sub:'Track changes in equity accounts across the reporting period',
-    fields:[
-      {id:'company', label:'Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'period', label:'Reporting Period', type:'text', placeholder:'FY2025', span:'half'},
-      {id:'beginning_equity', label:'Beginning Equity Balance ($)', type:'text', placeholder:'1,950,000', span:'half'},
-      {id:'netincome', label:'Net Income ($)', type:'text', placeholder:'780,000', span:'half'},
-      {id:'dividends', label:'Dividends Paid ($)', type:'text', placeholder:'-180,000', span:'half'},
-      {id:'stock_issued', label:'Stock Issued ($)', type:'text', placeholder:'250,000', span:'half'},
-      {id:'buybacks', label:'Share Buybacks ($)', type:'text', placeholder:'0', span:'half'},
-      {id:'notes', label:'Additional Notes', type:'textarea', placeholder:'Stock option exercises, OCI items...', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'Generate a Statement of Changes in Stockholders Equity for "'+d.company+'" for '+d.period+'. '+
-      'Inputs: Beginning Equity $'+d.beginning_equity+', Net Income $'+d.netincome+', Dividends Paid $'+d.dividends+', Stock Issued $'+d.stock_issued+', Share Buybacks $'+d.buybacks+'. '+
-      (d.notes ? 'Context: '+d.notes+'. ' : '') +
-      'Show a roll-forward table from Beginning Balance through Net Income, Dividends, Stock Issuances, Buybacks, Other Comprehensive Income, to Ending Balance. Break equity into components (Common Stock, APIC, Retained Earnings, Treasury Stock, AOCI) where reasonable. Add commentary on capital allocation decisions.';
-    }
-  },
-  annual: {
-    title:'Full Annual Report', sub:'Generate a comprehensive annual financial report combining all statements',
-    fields:[
-      {id:'company', label:'Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'period', label:'Fiscal Year', type:'text', placeholder:'FY2025', span:'half'},
-      {id:'industry', label:'Industry', type:'text', placeholder:'SaaS / Technology', span:'half'},
-      {id:'revenue', label:'Total Revenue ($)', type:'text', placeholder:'5,200,000', span:'half'},
-      {id:'netincome', label:'Net Income ($)', type:'text', placeholder:'780,000', span:'half'},
-      {id:'totalassets', label:'Total Assets ($)', type:'text', placeholder:'4,100,000', span:'half'},
-      {id:'employees', label:'Employee Count', type:'text', placeholder:'42', span:'half'},
-      {id:'notes', label:'Key Highlights / Context', type:'textarea', placeholder:'Major events, growth drivers, challenges this year...', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'Generate a comprehensive Annual Financial Report for "'+d.company+'" ('+d.industry+' industry) for '+d.period+'. '+
-      'Key figures: Total Revenue $'+d.revenue+', Net Income $'+d.netincome+', Total Assets $'+d.totalassets+', Employees: '+d.employees+'. '+
-      (d.notes ? 'Highlights: '+d.notes+'. ' : '') +
-      'Structure as: 1) Executive Summary, 2) Letter to Stakeholders tone overview, 3) Summarised Income Statement, 4) Summarised Balance Sheet, 5) Key Financial Ratios (profitability, liquidity, efficiency), 6) Year-over-year growth narrative, 7) Risk Factors, 8) Outlook for next fiscal year. Use markdown tables for all financial figures. Professional, investor-ready tone throughout.';
-    }
-  },
+// ── Trust proxy (Render.com sits behind a load balancer) ─────────────────────
+app.set('trust proxy', 1);
 
-  // ── ACCOUNTING ─────────────────────────────────────────────────
-  journal: {
-    title:'Journal Entry Generator', sub:'Generate properly formatted double-entry journal entries',
-    fields:[
-      {id:'company', label:'Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'transaction', label:'Transaction Description', type:'textarea', placeholder:'Describe the transaction: e.g. "Purchased equipment for $45,000 cash, paid $5,000 deposit and financed remainder over 3 years at 6% interest"', span:'single'},
-      {id:'date', label:'Transaction Date', type:'text', placeholder:'March 15, 2025', span:'half'},
-      {id:'standard', label:'Accounting Standard', type:'select', options:['GAAP (US)','IFRS'], span:'half'},
-    ],
-    promptFn: function(d){
-      return 'Generate properly formatted double-entry journal entries for "'+d.company+'" under '+d.standard+' for the following transaction dated '+d.date+': '+d.transaction+'. '+
-      'Present as a markdown table with columns: Date, Account, Debit, Credit, and a brief description. Ensure debits equal credits. Follow with a short explanation of the accounting treatment and which accounts are affected (asset/liability/equity/revenue/expense classification). If the transaction is ambiguous, state your assumptions clearly.';
-    }
-  },
-  ledger: {
-    title:'General Ledger Builder', sub:'Build a general ledger summary from a list of transactions',
-    fields:[
-      {id:'company', label:'Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'account', label:'Account Name', type:'text', placeholder:'Accounts Receivable', span:'half'},
-      {id:'period', label:'Period', type:'text', placeholder:'Q1 2025', span:'half'},
-      {id:'transactions', label:'Transaction List', type:'textarea', placeholder:'List transactions affecting this account, one per line:\nJan 5: Invoice #1001 issued $12,000\nJan 18: Payment received $8,000\nFeb 2: Invoice #1002 issued $15,500', span:'single'},
-      {id:'opening', label:'Opening Balance ($)', type:'text', placeholder:'24,000', span:'half'},
-    ],
-    promptFn: function(d){
-      return 'Build a General Ledger summary for the "'+d.account+'" account for "'+d.company+'" covering '+d.period+'. Opening balance: $'+d.opening+'. Transactions: '+d.transactions+'. '+
-      'Present as a markdown T-account style ledger table with columns: Date, Description, Debit, Credit, Running Balance. Calculate the ending balance. Follow with a brief summary of account activity and any notable trends (e.g. aging, turnover).';
-    }
-  },
-  reconcile: {
-    title:'Bank Reconciliation', sub:'Reconcile book balance to bank statement balance',
-    fields:[
-      {id:'company', label:'Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'asof', label:'As-Of Date', type:'text', placeholder:'March 31, 2025', span:'half'},
-      {id:'book_balance', label:'Book Balance ($)', type:'text', placeholder:'45,820', span:'half'},
-      {id:'bank_balance', label:'Bank Statement Balance ($)', type:'text', placeholder:'48,150', span:'half'},
-      {id:'outstanding_checks', label:'Outstanding Checks ($)', type:'text', placeholder:'3,200', span:'half'},
-      {id:'deposits_transit', label:'Deposits in Transit ($)', type:'text', placeholder:'1,500', span:'half'},
-      {id:'bank_fees', label:'Bank Fees Not Recorded ($)', type:'text', placeholder:'45', span:'half'},
-      {id:'notes', label:'Other Reconciling Items', type:'textarea', placeholder:'NSF checks, interest earned, errors found...', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'Prepare a Bank Reconciliation Statement for "'+d.company+'" as of '+d.asof+'. Book Balance: $'+d.book_balance+', Bank Statement Balance: $'+d.bank_balance+', Outstanding Checks: $'+d.outstanding_checks+', Deposits in Transit: $'+d.deposits_transit+', Unrecorded Bank Fees: $'+d.bank_fees+'. '+
-      (d.notes ? 'Other items: '+d.notes+'. ' : '') +
-      'Present a standard two-sided reconciliation: starting from Bank Balance (add deposits in transit, subtract outstanding checks) and Book Balance (subtract bank fees, add/subtract other items) until both sides reach the same Adjusted Balance. Flag any discrepancy that does not reconcile and suggest likely causes plus next investigative steps.';
-    }
-  },
-  depreciation: {
-    title:'Depreciation Schedule', sub:'Generate a fixed asset depreciation schedule',
-    fields:[
-      {id:'company', label:'Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'asset', label:'Asset Description', type:'text', placeholder:'Manufacturing Equipment - Line 3', span:'single'},
-      {id:'cost', label:'Asset Cost ($)', type:'text', placeholder:'250,000', span:'half'},
-      {id:'salvage', label:'Salvage Value ($)', type:'text', placeholder:'20,000', span:'half'},
-      {id:'life', label:'Useful Life (years)', type:'text', placeholder:'10', span:'half'},
-      {id:'method', label:'Depreciation Method', type:'select', options:['Straight-Line','Double-Declining Balance','Units of Production','Sum-of-Years-Digits'], span:'half'},
-      {id:'startdate', label:'In-Service Date', type:'text', placeholder:'January 1, 2025', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'Generate a full Depreciation Schedule for "'+d.asset+'" owned by "'+d.company+'", using the '+d.method+' method. Cost: $'+d.cost+', Salvage Value: $'+d.salvage+', Useful Life: '+d.life+' years, In-Service Date: '+d.startdate+'. '+
-      'Present as a year-by-year markdown table showing: Year, Beginning Book Value, Depreciation Expense, Accumulated Depreciation, Ending Book Value, for the full useful life. Show the formula used and explain why this method was appropriate for this asset type. Note any tax depreciation differences (e.g. MACRS) if relevant.';
-    }
-  },
-  payroll: {
-    title:'Payroll Summary Generator', sub:'Generate a payroll summary with tax withholdings and employer costs',
-    fields:[
-      {id:'company', label:'Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'period', label:'Pay Period', type:'text', placeholder:'March 1-15, 2025', span:'half'},
-      {id:'employees', label:'Number of Employees', type:'text', placeholder:'12', span:'half'},
-      {id:'gross_pay', label:'Total Gross Pay ($)', type:'text', placeholder:'68,400', span:'half'},
-      {id:'jurisdiction', label:'Tax Jurisdiction', type:'text', placeholder:'United States - California', span:'half'},
-      {id:'benefits', label:'Benefits Deductions ($)', type:'text', placeholder:'4,200', span:'half'},
-      {id:'notes', label:'Additional Notes', type:'textarea', placeholder:'Bonuses, overtime, special deductions...', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'Generate a Payroll Summary Report for "'+d.company+'" covering pay period '+d.period+' for '+d.employees+' employees in '+d.jurisdiction+'. Total Gross Pay: $'+d.gross_pay+', Benefits Deductions: $'+d.benefits+'. '+
-      (d.notes ? 'Notes: '+d.notes+'. ' : '') +
-      'Present a markdown table summarising: Gross Pay, Federal Income Tax Withholding (estimate), State Tax Withholding (estimate), Social Security/Medicare (FICA at 7.65% employee + 7.65% employer), Benefits Deductions, Net Pay. Also show total Employer Payroll Tax Cost. Add a brief compliance note about filing deadlines (941, state equivalents) relevant to this jurisdiction.';
-    }
-  },
-  tax: {
-    title:'Tax Provision Calculator', sub:'Calculate current and deferred tax provision',
-    fields:[
-      {id:'company', label:'Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'period', label:'Tax Year', type:'text', placeholder:'FY2025', span:'half'},
-      {id:'jurisdiction', label:'Tax Jurisdiction', type:'text', placeholder:'United States (Federal + State)', span:'half'},
-      {id:'pretax_income', label:'Pre-Tax Book Income ($)', type:'text', placeholder:'920,000', span:'half'},
-      {id:'statutory_rate', label:'Statutory Tax Rate (%)', type:'text', placeholder:'25.8', span:'half'},
-      {id:'temp_differences', label:'Known Temporary Differences', type:'textarea', placeholder:'e.g. Depreciation timing differences $45,000, accrued bonus not yet paid $30,000', span:'single'},
-      {id:'permanent_differences', label:'Known Permanent Differences', type:'textarea', placeholder:'e.g. Meals & entertainment non-deductible $8,000, tax-exempt interest $5,000', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'Calculate the Tax Provision for "'+d.company+'" for '+d.period+' in '+d.jurisdiction+'. Pre-Tax Book Income: $'+d.pretax_income+', Statutory Rate: '+d.statutory_rate+'%. '+
-      'Temporary differences: '+(d.temp_differences||'none provided')+'. Permanent differences: '+(d.permanent_differences||'none provided')+'. '+
-      'Calculate: Taxable Income (Book Income adjusted for permanent and temporary differences), Current Tax Expense, Deferred Tax Asset/Liability movement, Total Tax Provision, and resulting Effective Tax Rate vs Statutory Rate. Present as a markdown reconciliation table (rate reconciliation format) followed by a brief explanation of each adjustment.';
-    }
-  },
+// ── Core middleware ───────────────────────────────────────────────────────────
+app.use(helmetMiddleware);
+app.use(corsMiddleware);
+app.use(compression);
+app.use(requestId);
+app.use(complianceHeaders);
+app.use(accessLog);
+app.use(globalLimiter);
 
-  // ── AUDIT ───────────────────────────────────────────────────────
-  riskassess: {
-    title:'Audit Risk Assessment', sub:'Generate a risk assessment matrix for audit planning',
-    fields:[
-      {id:'company', label:'Client Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'industry', label:'Industry', type:'text', placeholder:'Manufacturing', span:'half'},
-      {id:'auditType', label:'Audit Type', type:'select', options:['Financial Statement Audit','Internal Audit','SOC 2 Audit','Compliance Audit'], span:'half'},
-      {id:'size', label:'Company Size', type:'select', options:['Small (<$10M revenue)','Mid-Market ($10M-$100M)','Large (>$100M)'], span:'single'},
-      {id:'concerns', label:'Known Risk Areas / Concerns', type:'textarea', placeholder:'e.g. Rapid growth, new ERP system implementation, related-party transactions, history of inventory discrepancies...', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'Generate an Audit Risk Assessment for "'+d.company+'" ('+d.industry+' industry, '+d.size+') for a '+d.auditType+'. '+
-      'Known concerns flagged by management/prior auditors: '+(d.concerns||'none specified, assess based on industry norms')+'. '+
-      'Produce a Risk Assessment Matrix as a markdown table covering key audit areas (Revenue Recognition, Inventory, Related Party Transactions, IT General Controls, Management Override, Going Concern, Fraud Risk) with columns: Risk Area, Inherent Risk (Low/Medium/High), Likelihood, Potential Impact, Planned Audit Response. Follow with a narrative summary of the top 3 risk areas requiring heightened audit attention and suggested sample sizes/testing approach for each.';
-    }
-  },
-  controls: {
-    title:'Internal Controls Review', sub:'Evaluate internal control design and operating effectiveness',
-    fields:[
-      {id:'company', label:'Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'process', label:'Process Under Review', type:'select', options:['Revenue Cycle','Procurement & Payables','Payroll','Financial Close','IT General Controls','Inventory Management'], span:'half'},
-      {id:'framework', label:'Control Framework', type:'select', options:['COSO','SOC 2 Trust Criteria','Custom'], span:'half'},
-      {id:'description', label:'Current Process Description', type:'textarea', placeholder:'Describe how this process currently works, who is involved, what systems are used...', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'Conduct an Internal Controls Review for the '+d.process+' process at "'+d.company+'", using the '+d.framework+' framework. '+
-      'Current process description: '+d.description+'. '+
-      'Identify key controls that should exist for this process (e.g. segregation of duties, authorization limits, reconciliations, system access controls). Present as a markdown table: Control Objective, Control Activity, Control Type (Preventive/Detective), Design Assessment (Adequate/Gap Identified), Recommendation. Conclude with an overall control environment rating and the top 3 priority remediation items.';
-    }
-  },
-  substantive: {
-    title:'Substantive Testing Plan', sub:'Design a substantive audit testing approach for a specific account',
-    fields:[
-      {id:'company', label:'Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'account', label:'Account/Balance Being Tested', type:'text', placeholder:'Accounts Receivable', span:'half'},
-      {id:'balance', label:'Account Balance ($)', type:'text', placeholder:'1,250,000', span:'half'},
-      {id:'materiality', label:'Performance Materiality ($)', type:'text', placeholder:'62,500', span:'half'},
-      {id:'risk_level', label:'Assessed Risk Level', type:'select', options:['Low','Moderate','High'], span:'half'},
-    ],
-    promptFn: function(d){
-      return 'Design a Substantive Testing Plan for the '+d.account+' balance ($'+d.balance+') at "'+d.company+'". Performance Materiality: $'+d.materiality+'. Assessed Risk Level: '+d.risk_level+'. '+
-      'Recommend specific substantive procedures appropriate for this account (e.g. confirmations, cut-off testing, subsequent receipts testing, vouching, analytical review) with sample size guidance based on the risk level and materiality provided. Present as a markdown table: Procedure, Objective (Existence/Completeness/Valuation/Rights), Sample Size/Scope, Expected Evidence. Conclude with the overall audit approach rationale (combined vs substantive-only approach).';
-    }
-  },
-  findings: {
-    title:'Audit Findings Report', sub:'Document audit findings and management recommendations',
-    fields:[
-      {id:'company', label:'Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'period', label:'Audit Period', type:'text', placeholder:'FY2025', span:'half'},
-      {id:'auditor', label:'Lead Auditor', type:'text', placeholder:'Jane Smith, CPA', span:'half'},
-      {id:'findings_raw', label:'Findings (one per line)', type:'textarea', placeholder:'e.g.\nInvoices over $10,000 lack secondary approval signature\nBank reconciliations not performed monthly for 3 of 12 months\nFixed asset register not updated since 2023', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'Prepare a formal Audit Findings Report for "'+d.company+'" covering '+d.period+', led by '+d.auditor+'. Raw findings identified during fieldwork: '+d.findings_raw+'. '+
-      'For each finding, produce: Finding Description, Risk/Impact (Low/Medium/High), Root Cause, Management Recommendation, Suggested Remediation Timeline. Present as a structured markdown report with each finding numbered. Conclude with an Overall Audit Conclusion paragraph summarising the control environment and whether any findings are material enough to affect the audit opinion.';
-    }
-  },
-  opinion: {
-    title:'Audit Opinion Draft', sub:'Draft a formal audit opinion letter',
-    fields:[
-      {id:'company', label:'Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'period', label:'Period Audited', type:'text', placeholder:'fiscal year ended December 31, 2025', span:'single'},
-      {id:'opinion_type', label:'Opinion Type', type:'select', options:['Unqualified (Clean)','Qualified','Adverse','Disclaimer of Opinion'], span:'half'},
-      {id:'firm', label:'Audit Firm Name', type:'text', placeholder:'Corverxis Audit Partners LLP', span:'half'},
-      {id:'basis', label:'Basis for Modified Opinion (if applicable)', type:'textarea', placeholder:'Leave blank if Unqualified. Otherwise describe the matter giving rise to the qualification...', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'Draft a formal Independent Auditor\'s Report for "'+d.company+'" for the '+d.period+', issued by '+d.firm+'. Opinion type: '+d.opinion_type+'. '+
-      (d.basis ? 'Basis for modified opinion: '+d.basis+'. ' : '') +
-      'Follow standard audit report structure: Title, Opinion paragraph, Basis for Opinion, Key Audit Matters (if unqualified, note 1-2 typical KAMs for this type of engagement), Responsibilities of Management, Responsibilities of Auditor, Report Date, Signature block. Use formal, precise audit report language consistent with PCAOB/ISA standards. This is a DRAFT for review by a licensed auditor before issuance.';
-    }
-  },
-  compliance: {
-    title:'Compliance Checklist Generator', sub:'Generate a regulatory compliance checklist',
-    fields:[
-      {id:'company', label:'Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'regulation', label:'Regulation / Standard', type:'select', options:['SOX (Sarbanes-Oxley)','SOC 2','GDPR Financial Data','HIPAA Financial Records','PCI-DSS','General GAAP Compliance'], span:'half'},
-      {id:'entity_type', label:'Entity Type', type:'select', options:['Public Company','Private Company','Non-Profit','Government Contractor'], span:'half'},
-      {id:'notes', label:'Specific Areas of Concern', type:'textarea', placeholder:'Any specific compliance gaps or recent changes to address...', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'Generate a Compliance Checklist for "'+d.company+'" ('+d.entity_type+') against '+d.regulation+' requirements. '+
-      (d.notes ? 'Specific concerns: '+d.notes+'. ' : '') +
-      'Present as a markdown checklist table organised by compliance category, with columns: Requirement, Description, Status (To Assess), Owner, Priority. Cover the major compliance domains relevant to '+d.regulation+'. Conclude with a brief summary of the 3 highest-priority compliance gaps typically found in similar organisations and recommended first steps.';
-    }
-  },
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
+app.use(cookieParser());
 
-  // ── MARKET ANALYSIS ────────────────────────────────────────────
-  company: {
-    title:'Company Valuation', sub:'Generate a company valuation using multiple methodologies',
-    fields:[
-      {id:'company', label:'Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'industry', label:'Industry', type:'text', placeholder:'SaaS / Enterprise Software', span:'half'},
-      {id:'revenue', label:'Annual Revenue ($)', type:'text', placeholder:'12,000,000', span:'half'},
-      {id:'ebitda', label:'EBITDA ($)', type:'text', placeholder:'2,400,000', span:'half'},
-      {id:'growth', label:'Revenue Growth Rate (%)', type:'text', placeholder:'35', span:'half'},
-      {id:'netincome', label:'Net Income ($)', type:'text', placeholder:'1,100,000', span:'half'},
-      {id:'comparable', label:'Comparable Companies (if known)', type:'text', placeholder:'e.g. similar SaaS companies trading at 6-8x revenue', span:'half'},
-      {id:'notes', label:'Additional Context', type:'textarea', placeholder:'Funding stage, market position, competitive moat, risks...', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'Perform a Company Valuation for "'+d.company+'" in the '+d.industry+' industry. Revenue: $'+d.revenue+', EBITDA: $'+d.ebitda+', Revenue Growth: '+d.growth+'%, Net Income: $'+d.netincome+'. '+
-      (d.comparable ? 'Comparable reference: '+d.comparable+'. ' : '') +
-      (d.notes ? 'Context: '+d.notes+'. ' : '') +
-      'Apply three valuation methodologies: 1) Comparable Company Analysis (apply reasonable industry-typical EV/Revenue and EV/EBITDA multiples for this sector and growth profile), 2) Discounted Cash Flow (use reasonable WACC and terminal growth assumptions, show key assumptions explicitly), 3) Precedent Transaction approach (qualitative if data is limited). Present a valuation summary table with a value range for each method, then a triangulated Enterprise Value range. Include all key assumptions used.';
-    }
+// Session — memory store, only used for OAuth handshake state (seconds-lived)
+app.use(session({
+  secret:            config.session.secret,
+  resave:            false,
+  saveUninitialized: false,
+  cookie: {
+    secure:   config.isProd(),
+    httpOnly: true,
+    sameSite: 'lax',
+    maxAge:   5 * 60 * 1000, // 5 min — only needed for OAuth state exchange
   },
-  ratio: {
-    title:'Financial Ratio Analysis', sub:'Calculate and interpret key financial ratios',
-    fields:[
-      {id:'company', label:'Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'revenue', label:'Revenue ($)', type:'text', placeholder:'5,200,000', span:'half'},
-      {id:'netincome', label:'Net Income ($)', type:'text', placeholder:'780,000', span:'half'},
-      {id:'totalassets', label:'Total Assets ($)', type:'text', placeholder:'4,100,000', span:'half'},
-      {id:'totalequity', label:'Total Equity ($)', type:'text', placeholder:'2,400,000', span:'half'},
-      {id:'currentassets', label:'Current Assets ($)', type:'text', placeholder:'1,880,000', span:'half'},
-      {id:'currentliab', label:'Current Liabilities ($)', type:'text', placeholder:'920,000', span:'half'},
-      {id:'totaldebt', label:'Total Debt ($)', type:'text', placeholder:'1,200,000', span:'half'},
-      {id:'industry_avg', label:'Industry (for benchmark context)', type:'text', placeholder:'SaaS / Technology', span:'half'},
-    ],
-    promptFn: function(d){
-      return 'Perform a comprehensive Financial Ratio Analysis for "'+d.company+'" in the '+d.industry_avg+' industry. '+
-      'Revenue: $'+d.revenue+', Net Income: $'+d.netincome+', Total Assets: $'+d.totalassets+', Total Equity: $'+d.totalequity+', Current Assets: $'+d.currentassets+', Current Liabilities: $'+d.currentliab+', Total Debt: $'+d.totaldebt+'. '+
-      'Calculate and present in a markdown table organised by category: Profitability (Net Margin, ROA, ROE), Liquidity (Current Ratio, Quick Ratio, Working Capital), Leverage (Debt-to-Equity, Debt-to-Assets), Efficiency (Asset Turnover). For each ratio show the calculated value and a brief interpretation (strong/average/weak relative to typical '+d.industry_avg+' benchmarks). Conclude with an overall financial health summary.';
-    }
-  },
-  competitor: {
-    title:'Competitor Benchmarking', sub:'Compare financial and strategic position against competitors',
-    fields:[
-      {id:'company', label:'Your Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'competitors', label:'Competitors (comma-separated)', type:'text', placeholder:'CompetitorCo, RivalCorp, ThirdPlayer Inc', span:'single'},
-      {id:'industry', label:'Industry', type:'text', placeholder:'SaaS / Project Management Tools', span:'half'},
-      {id:'metrics', label:'Your Key Metrics', type:'textarea', placeholder:'Revenue $5.2M, 35% YoY growth, 82% gross margin, 1,200 customers...', span:'single'},
-      {id:'focus', label:'Analysis Focus', type:'select', options:['Financial Performance','Market Positioning','Pricing Strategy','Full Strategic Comparison'], span:'half'},
-    ],
-    promptFn: function(d){
-      return 'Perform a Competitor Benchmarking analysis for "'+d.company+'" against '+d.competitors+' in the '+d.industry+' industry, focused on '+d.focus+'. '+
-      'Your company metrics: '+d.metrics+'. '+
-      'Using general industry knowledge about these competitor types and publicly known patterns in this sector, build a comparison table covering relevant dimensions (revenue scale, growth rate, pricing model, market position, key differentiators). Where specific competitor data is not publicly known, clearly state this is an estimated/directional comparison based on general market positioning. Conclude with 3 strategic recommendations for competitive positioning.';
-    }
-  },
-  sector: {
-    title:'Sector & Industry Report', sub:'Generate a market and industry landscape analysis',
-    fields:[
-      {id:'sector', label:'Sector / Industry', type:'text', placeholder:'Artificial Intelligence SaaS', span:'single'},
-      {id:'geography', label:'Geographic Focus', type:'text', placeholder:'North America', span:'half'},
-      {id:'timeframe', label:'Analysis Timeframe', type:'text', placeholder:'2025-2027 outlook', span:'half'},
-      {id:'focus_areas', label:'Specific Areas of Interest', type:'textarea', placeholder:'Market size, growth drivers, regulatory environment, key players, M&A activity...', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'Generate a Sector & Industry Report on the '+d.sector+' sector, focused on '+d.geography+', covering the '+d.timeframe+' outlook. '+
-      (d.focus_areas ? 'Areas of interest: '+d.focus_areas+'. ' : '') +
-      'Structure the report with: Market Size & Growth Estimate (TAM/SAM where reasonable to estimate), Key Growth Drivers, Competitive Landscape Overview (categories of players, not specific confidential data), Regulatory Environment, Key Risks & Headwinds, M&A and Investment Activity Trends, Outlook & Forecast for the specified timeframe. Use a professional equity-research tone. Clearly flag where figures are estimates based on general market knowledge versus specific data points.';
-    }
-  },
-  investment: {
-    title:'Investment Memo Generator', sub:'Draft an investment committee memo for a potential deal',
-    fields:[
-      {id:'target', label:'Target Company', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'deal_type', label:'Deal Type', type:'select', options:['Equity Investment / VC','Private Equity Buyout','Debt Financing','M&A Acquisition'], span:'half'},
-      {id:'amount', label:'Deal Size ($)', type:'text', placeholder:'5,000,000', span:'half'},
-      {id:'valuation', label:'Proposed Valuation ($)', type:'text', placeholder:'25,000,000', span:'half'},
-      {id:'industry', label:'Industry', type:'text', placeholder:'B2B SaaS', span:'half'},
-      {id:'thesis', label:'Investment Thesis / Key Facts', type:'textarea', placeholder:'Revenue $4M ARR, 120% net revenue retention, founder-led, strong product-market fit in mid-market segment...', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'Draft an Investment Committee Memo for a proposed '+d.deal_type+' in "'+d.target+'" ('+d.industry+'). Deal Size: $'+d.amount+', Proposed Valuation: $'+d.valuation+'. '+
-      'Key facts/thesis: '+d.thesis+'. '+
-      'Structure as a formal IC memo: Executive Summary & Recommendation, Company Overview, Investment Thesis (3-4 key points), Financial Summary, Valuation Rationale (implied multiple given the deal size and valuation), Key Risks, Mitigants, Proposed Deal Terms, Recommendation (Proceed/Proceed with Conditions/Pass) with rationale. Professional institutional investment tone throughout.';
-    }
-  },
-  forecast: {
-    title:'Financial Forecast Builder', sub:'Build a multi-year financial forecast and projection model',
-    fields:[
-      {id:'company', label:'Company Name', type:'text', placeholder:'Acme Corporation Ltd', span:'single'},
-      {id:'current_revenue', label:'Current Year Revenue ($)', type:'text', placeholder:'5,200,000', span:'half'},
-      {id:'growth_rate', label:'Expected Annual Growth (%)', type:'text', placeholder:'30', span:'half'},
-      {id:'current_margin', label:'Current Gross Margin (%)', type:'text', placeholder:'68', span:'half'},
-      {id:'years', label:'Forecast Period (years)', type:'select', options:['3','5'], span:'half'},
-      {id:'assumptions', label:'Key Assumptions', type:'textarea', placeholder:'Margin expansion expected as scale increases, opex growing slower than revenue, planned hiring of 15 FTEs in year 2...', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'Build a '+d.years+'-Year Financial Forecast for "'+d.company+'", starting from Current Year Revenue of $'+d.current_revenue+', expected growth of '+d.growth_rate+'% annually, current Gross Margin of '+d.current_margin+'%. '+
-      'Key assumptions: '+d.assumptions+'. '+
-      'Build a year-by-year markdown table projecting: Revenue, COGS, Gross Profit (with margin %), Operating Expenses (assume reasonable opex-to-revenue ratio trending favourably with scale), EBITDA, Net Income, for each year of the forecast period. State all modelling assumptions explicitly in a notes section beneath the table. Conclude with a sensitivity commentary: what happens to the forecast under a bear case (lower growth) and bull case (higher growth) scenario.';
-    }
-  },
+}));
 
-  // ── TRADING AGENT ──────────────────────────────────────────────
-  equityforecast: {
-    title:'Equity & Index Forecast', sub:'AI-powered price forecast with live market data for stocks and indices',
-    fields:[
-      {id:'symbol', label:'Stock / Index Symbol or Name', type:'text', placeholder:'e.g. Apple (AAPL), S&P 500, NASDAQ 100, Tesla (TSLA)', span:'single'},
-      {id:'timeframe', label:'Forecast Timeframe', type:'select', options:['Intraday (Today)','Short-Term (1–5 Days)','Swing (1–4 Weeks)','Medium-Term (1–3 Months)','Long-Term (6–12 Months)'], span:'half'},
-      {id:'analysis_type', label:'Analysis Focus', type:'select', options:['Technical Analysis','Fundamental + Technical','Macro-Driven','Earnings / Catalyst Event'], span:'half'},
-      {id:'current_price', label:'Your Reference Price (optional)', type:'text', placeholder:'e.g. $195.40 — leave blank to use live data', span:'half'},
-      {id:'portfolio_size', label:'Position / Portfolio Context (optional)', type:'text', placeholder:'e.g. $10,000 long position, 5% of portfolio', span:'half'},
-      {id:'notes', label:'Additional Context or Thesis', type:'textarea', placeholder:'Any macro views, upcoming catalysts, earnings date, sector tailwinds/headwinds you want incorporated...', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'You are a top-tier financial market analyst. Use your web search tool to find CURRENT, live data for: "'+d.symbol+'". Search for: current price, recent price action (past 5–30 days), key technical levels (52-week high/low, recent support/resistance), major moving averages (50-day, 200-day), RSI / momentum indicators if available, any recent news or catalyst, analyst consensus / price targets, and relevant macro backdrop. '+
-      'Then produce a comprehensive '+d.timeframe+' forecast using a '+d.analysis_type+' approach. '+(d.current_price ? 'User reference price: '+d.current_price+'. ' : '')+
-      (d.portfolio_size ? 'Portfolio context: '+d.portfolio_size+'. ' : '')+(d.notes ? 'User thesis / context: '+d.notes+'. ' : '')+
-      'Structure your output as follows:\n\n## Market Snapshot (from live search)\nCurrent price, 24h/1W/1M change, 52-week range, volume context.\n\n## Directional Bias\nClearly state: BULLISH / BEARISH / NEUTRAL with a confidence score (e.g. 72% Bullish). Justify in 2–3 sentences.\n\n## Key Price Levels\nMarkdown table with: Level Type | Price | Significance\nInclude: Major Support, Secondary Support, Current Price, Resistance 1, Resistance 2, Major Resistance\n\n## Technical Analysis\nMomentum, trend structure, volume analysis, any chart patterns identified (e.g. bull flag, head & shoulders, consolidation), indicator readings.\n\n## Fundamental / Catalyst Drivers\nKey drivers supporting or opposing the forecast direction.\n\n## Risk Factors\nTop 3 risks that could invalidate the forecast.\n\n## Forecast Scenarios\nMarkdown table: Scenario | Trigger | Price Target | Probability\nBull Case, Base Case, Bear Case.\n\n## Suggested Trade Parameters\nEntry Zone | Stop Loss | Target 1 | Target 2 | Risk/Reward\n\n## Market Intelligence Summary\n3–4 bullet points a professional trader would want to know right now.';
-    }
-  },
-  fxoutlook: {
-    title:'FX / Currency Outlook', sub:'Live currency pair analysis with directional forecast and key levels',
-    fields:[
-      {id:'pair', label:'Currency Pair', type:'text', placeholder:'e.g. EUR/USD, GBP/JPY, USD/CAD, AUD/USD, DXY (Dollar Index)', span:'single'},
-      {id:'timeframe', label:'Forecast Timeframe', type:'select', options:['Intraday','Short-Term (1–5 Days)','Swing (1–4 Weeks)','Medium-Term (1–3 Months)'], span:'half'},
-      {id:'macro_focus', label:'Key Driver Focus', type:'select', options:['Interest Rate Differentials','Inflation / CPI Data','Central Bank Policy','Risk Sentiment','Technical Levels Only'], span:'half'},
-      {id:'base_currency_country', label:'Base Currency Economy Context (optional)', type:'text', placeholder:'e.g. Recent Fed minutes hawkish, US jobs data strong', span:'single'},
-      {id:'notes', label:'Additional Context', type:'textarea', placeholder:'Any upcoming central bank meetings, economic releases, geopolitical factors...', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'You are an expert FX analyst and macro trader. Use your web search tool to gather LIVE current data for the currency pair: "'+d.pair+'". Search for: current spot rate, recent price action and trend, key technical levels (pivots, support/resistance, moving averages), interest rate differentials between the two central banks, recent central bank commentary, upcoming economic events that could move this pair, and any relevant risk sentiment indicators (VIX, DXY, gold).\n\n'+
-      'Produce a professional '+d.timeframe+' FX Outlook for '+d.pair+' with '+d.macro_focus+' as the primary driver framework. '+(d.base_currency_country ? 'Additional macro context: '+d.base_currency_country+'. ' : '')+(d.notes ? 'User notes: '+d.notes+'. ' : '')+
-      'Structure:\n\n## Live Market Snapshot\nCurrent rate, session range, recent trend direction, DXY context.\n\n## Macro & Rate Differential Analysis\nInterest rate comparison table, central bank stances (Hawkish/Neutral/Dovish), policy divergence impact.\n\n## Directional Bias\nBULLISH [Base] / BEARISH [Base] / RANGE-BOUND with confidence %. Explain the primary reason.\n\n## Key Technical Levels\nMarkdown table: Level | Rate | Notes — covering major support, pivot, current rate, resistance, and key psychological levels.\n\n## Event Risk Calendar\nUpcoming events that could impact this pair (meetings, CPI, NFP, GDP releases) with expected impact.\n\n## Forecast Scenarios\nScenario | Trigger | Rate Target | Probability — Bull, Base, Bear.\n\n## Trade Recommendation\nEntry Zone | Stop | Target 1 | Target 2 | R:R ratio | Position sizing note';
-    }
-  },
-  commodity: {
-    title:'Commodity Forecast', sub:'Price forecast and market outlook for energy, metals, and agricultural commodities',
-    fields:[
-      {id:'commodity', label:'Commodity', type:'select', options:['Gold (XAU/USD)','Silver (XAG/USD)','Crude Oil (WTI)','Brent Crude Oil','Natural Gas','Copper','Platinum','Palladium','Wheat','Corn','Soybeans','Coffee','Cotton','Bitcoin (BTC)','Ethereum (ETH)','Custom (specify below)'], span:'half'},
-      {id:'custom_commodity', label:'Custom Commodity (if above = Custom)', type:'text', placeholder:'e.g. Lithium, Uranium, Lumber...', span:'half'},
-      {id:'timeframe', label:'Forecast Timeframe', type:'select', options:['Short-Term (1–2 Weeks)','Swing (1 Month)','Medium-Term (3–6 Months)','Long-Term (12 Months)'], span:'half'},
-      {id:'analysis_type', label:'Analysis Approach', type:'select', options:['Supply & Demand Fundamentals','Technical Analysis','Macro / USD Correlation','Geopolitical Risk Focus','Full Multi-Factor'], span:'half'},
-      {id:'notes', label:'Specific Factors or Thesis to Include', type:'textarea', placeholder:'e.g. China demand recovery, OPEC+ cuts, US dollar weakness, war premium, crop yield concerns...', span:'single'},
-    ],
-    promptFn: function(d){
-      var target = d.commodity === 'Custom (specify below)' ? (d.custom_commodity || 'the specified commodity') : d.commodity;
-      return 'You are a senior commodity analyst at a top-tier trading firm. Use your web search tool to find LIVE current data for: "'+target+'". Search for: current spot price, recent price performance (1W, 1M, 3M), year-to-date return, key supply/demand fundamentals, CFTC COT positioning data (if available), inventory/stockpile data, geopolitical factors, USD correlation, and any major analyst forecasts or bank targets.\n\n'+
-      'Produce a professional '+d.timeframe+' Commodity Forecast for '+target+' using a '+d.analysis_type+' framework. '+(d.notes ? 'User factors to incorporate: '+d.notes+'. ' : '')+
-      'Structure:\n\n## Live Market Snapshot\nCurrent price, 52-week range, YTD performance, trend description.\n\n## Supply & Demand Fundamentals\nKey supply factors (production, inventory, OPEC/cartel decisions), demand drivers (industrial, EM demand, seasonal), and balance (surplus/deficit).\n\n## Macro & USD Analysis\nDollar index correlation, inflation environment, real yield impact, central bank gold demand (if applicable).\n\n## Technical Picture\nKey support and resistance levels in a markdown table, trend structure, momentum.\n\n## Positioning & Sentiment\nCOT data summary, speculative positioning, options market signals, sentiment extremes.\n\n## Geopolitical & Event Risk\nTop risk events that could cause sharp moves.\n\n## Price Forecast Scenarios\nScenario | Catalyst | Price Target | Probability — Bull, Base, Bear.\n\n## Trade Intelligence\nEntry zone, stop, targets, R:R, and 3 key things to monitor this week.';
-    }
-  },
-  sentiment: {
-    title:'Market Sentiment Scan', sub:'Cross-asset sentiment analysis across equities, FX, commodities and macro',
-    fields:[
-      {id:'focus', label:'Market Scope', type:'select', options:['Global Overview (All Asset Classes)','US Equities Focus','European Markets','Asian Markets','Emerging Markets','Fixed Income & Rates','Crypto Markets'], span:'half'},
-      {id:'timeframe', label:'Sentiment Window', type:'select', options:['Current Session / Today','This Week','This Month','Quarter Ahead'], span:'half'},
-      {id:'risk_mode', label:'Risk Environment', type:'select', options:['Auto-Detect (use live data)','Risk-On','Risk-Off','Mixed / Transitional'], span:'half'},
-      {id:'indicators', label:'Key Indicators to Include', type:'select', options:['All (VIX, DXY, Gold, Yields, Credit Spreads)','VIX & Volatility Focus','Dollar & Rates Focus','Commodities & EM Focus'], span:'half'},
-      {id:'notes', label:'Specific Market Events or Questions', type:'textarea', placeholder:'e.g. How is the market digesting the recent Fed meeting? What does the bond market signal right now?', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'You are a cross-asset macro strategist. Use your web search tool extensively to gather CURRENT market data across multiple asset classes. Search for: VIX current level and recent trend, S&P 500 / major equity indices performance, US 10-year yield, 2-year yield, yield curve shape, DXY dollar index level, gold price, crude oil price, Bitcoin price, investment-grade and high-yield credit spread levels, recent Fed/ECB/BoJ commentary, and any major market-moving news from the past week.\n\n'+
-      'Produce a comprehensive '+d.timeframe+' Market Sentiment Scan for: '+d.focus+'. Risk Environment: '+d.risk_mode+'. Indicators: '+d.indicators+'.'+(d.notes ? ' Specific questions: '+d.notes : '')+
-      '\n\nStructure:\n\n## Sentiment Dashboard (Live)\nMarkdown table: Asset/Indicator | Current Level | Change (1W) | Signal (Risk-On/Risk-Off/Neutral)\nCover: VIX, S&P 500, NASDAQ, DXY, 10Y Yield, 2Y Yield, Yield Curve, Gold, Oil, Bitcoin, HY Spreads.\n\n## Overall Sentiment Reading\nRISK-ON / RISK-OFF / MIXED — with a sentiment score (0-100, where 100 = max risk-on). Justify in 2–3 sentences.\n\n## Cross-Asset Signal Analysis\nWhat is each major asset class telling us? Equities, Fixed Income, FX, Commodities each in 2–3 sentences.\n\n## Key Divergences & Warnings\nWhat is NOT confirming the trend? Where are the contradictions between asset classes?\n\n## Macro Narrative\nThe dominant market narrative right now and the key risks that could shift it.\n\n## Positioning Playbook\nFor each risk scenario, which assets benefit? Table: Scenario | Favoured Assets | Assets to Avoid.\n\n## 5 Things to Watch This Week\nOrdered bullet list of the most important catalysts and data releases.';
-    }
-  },
-  tradesetup: {
-    title:'Trade Setup Generator', sub:'Generate a complete, risk-managed trade plan for any market',
-    fields:[
-      {id:'instrument', label:'Instrument to Trade', type:'text', placeholder:'e.g. AAPL, EUR/USD, Gold, WTI Crude, BTC/USD, SPY', span:'single'},
-      {id:'direction', label:'Directional Bias', type:'select', options:['Long (Buy)','Short (Sell)','Let AI Decide Based on Analysis'], span:'half'},
-      {id:'timeframe', label:'Trade Timeframe', type:'select', options:['Scalp (Minutes–Hours)','Day Trade','Swing (Days–Weeks)','Position (Weeks–Months)'], span:'half'},
-      {id:'account_size', label:'Account / Capital at Risk ($)', type:'text', placeholder:'e.g. 50,000 — used to size position correctly', span:'half'},
-      {id:'risk_pct', label:'Max Risk Per Trade (%)', type:'text', placeholder:'e.g. 1 (= 1% of account)', span:'half'},
-      {id:'strategy', label:'Strategy Type', type:'select', options:['Breakout / Momentum','Mean Reversion / Pullback','Trend Following','Range / Support-Resistance','Event / Catalyst Play'], span:'half'},
-      {id:'notes', label:'Your Thesis or Setup Idea', type:'textarea', placeholder:'Describe what you see or why you like this trade — e.g. "AAPL broke above $195 resistance on volume, looking for continuation to $205"', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'You are a professional systematic trader and risk manager. Use your web search tool to get CURRENT price data, recent technical levels, and relevant news for: "'+d.instrument+'". Search for the current price, recent high/low, key support/resistance, volume trends, and any news that is relevant to this trade.\n\n'+
-      'Generate a complete, professional Trade Setup Plan for '+d.instrument+'. Direction: '+d.direction+'. Timeframe: '+d.timeframe+'. Strategy type: '+d.strategy+'. '+(d.account_size ? 'Account size: $'+d.account_size+'. ' : '')+(d.risk_pct ? 'Max risk per trade: '+d.risk_pct+'%. ' : '')+(d.notes ? 'Trader thesis: '+d.notes+'.' : '')+
-      '\n\nStructure:\n\n## Live Market Context\nCurrent price, recent action summary, key levels identified from search.\n\n## Trade Direction Analysis\nConfirm or challenge the proposed direction based on current data. State final recommended direction.\n\n## Complete Trade Plan\nMarkdown table with ALL parameters:\n| Parameter | Level | Rationale |\n|---|---|---|\n| Instrument | | |\n| Direction | | |\n| Entry Zone | | |\n| Stop Loss | | |\n| Target 1 (T1) | | |\n| Target 2 (T2) | | |\n| Target 3 (T3, stretch) | | |\n| Risk/Reward (to T1) | | |\n| Risk/Reward (to T2) | | |\n\n## Position Sizing\nBased on account size and risk %, calculate: max dollar risk, number of shares/contracts/units, exact position size, margin requirement (estimate).\n\n## Trade Management Rules\n- Entry trigger: what needs to happen to execute\n- Scale-in plan (if applicable)\n- Stop trail strategy\n- Partial profit-taking plan\n- Hard invalidation level\n\n## Key Risks & Catalysts\nTop 3 risks that invalidate this trade + any upcoming events (earnings, data, central bank) to be aware of.\n\n## Verdict\nGo / No-Go / Wait with a brief rationale.';
-    }
-  },
-  riskscanner: {
-    title:'Portfolio Risk Scanner', sub:'Assess cross-market risk exposure and stress-test your portfolio',
-    fields:[
-      {id:'holdings', label:'Portfolio Holdings', type:'textarea', placeholder:'List your positions, e.g:\nAAPL — $25,000 long\nGold — $10,000 long\nEUR/USD — $50,000 long (mini lot)\nSPY — $40,000 long\nBTC — $5,000 long', span:'single'},
-      {id:'total_size', label:'Total Portfolio Value ($)', type:'text', placeholder:'e.g. 130,000', span:'half'},
-      {id:'base_currency', label:'Base Currency', type:'select', options:['USD','GBP','EUR','JPY','AUD','CAD','CHF'], span:'half'},
-      {id:'risk_tolerance', label:'Risk Tolerance', type:'select', options:['Conservative (max 5% drawdown)','Moderate (5–15% drawdown acceptable)','Aggressive (15%+ drawdown acceptable)'], span:'half'},
-      {id:'horizon', label:'Investment Horizon', type:'select', options:['Short-Term Trader','Medium-Term (3–6 months)','Long-Term Investor (1+ year)'], span:'half'},
-      {id:'concerns', label:'Specific Risk Concerns', type:'textarea', placeholder:'e.g. Worried about USD strength, rate hikes, recession risk, crypto volatility, geopolitical escalation...', span:'single'},
-    ],
-    promptFn: function(d){
-      return 'You are a senior risk manager at a multi-asset hedge fund. Use your web search tool to gather CURRENT market data relevant to the portfolio described below. Search for: current levels of major equity indices (S&P, NASDAQ, Russell), bond yields, DXY dollar index, gold, oil, VIX, Bitcoin — and any significant macro risks or geopolitical events currently in the market.\n\n'+
-      'Portfolio: '+d.holdings+'. Total Value: $'+d.total_size+'. Base Currency: '+d.base_currency+'. Risk Tolerance: '+d.risk_tolerance+'. Horizon: '+d.horizon+'.'+(d.concerns ? ' Specific concerns: '+d.concerns : '')+
-      '\n\nStructure:\n\n## Portfolio Summary\nMarkdown table: Position | Market Value | % of Portfolio | Asset Class | Current Market Context\n\n## Correlation & Concentration Risk\nIdentify positions that are highly correlated. Where is the portfolio concentrated? What single risk factor (e.g. USD direction, risk-off, rates rising) could hurt multiple positions simultaneously?\n\n## Risk Metrics\n| Metric | Estimate | Assessment |\n|---|---|---|\n| Portfolio Beta (vs S&P 500) | | |\n| USD Sensitivity | | |\n| Interest Rate Sensitivity | | |\n| Equity Drawdown Risk (Bear Case) | | |\n| FX Risk (if applicable) | | |\n| Liquidity Risk | | |\n\n## Stress Test Scenarios\nMarkdown table: Scenario | Portfolio Impact ($) | Impact (%) | Most Affected Position\nInclude: 2008-style crash, rapid rate hike cycle, USD +10% spike, oil shock, crypto -60%, stagflation.\n\n## Risk-Adjusted Assessment vs Tolerance\nIs this portfolio appropriate for the stated risk tolerance and horizon? Where are the main mismatches?\n\n## Actionable Recommendations\n1. Concentration risks to reduce\n2. Hedges to consider (and suggested instruments)\n3. Positions to add for diversification\n4. Stop-loss levels to set immediately\n\n## Portfolio Health Score\nOverall risk score: X/10 with brief verdict.';
-    }
-  },
-};
+// ── Passport ──────────────────────────────────────────────────────────────────
+configurePassport();
+app.use(passport.initialize());
+app.use(passport.session());
 
-var MODULE_REPORT_MAP = {
-  statements: 'income', accounting: 'journal', audit: 'riskassess', market: 'company', trading: 'equityforecast'
-};
-</script>
-<script>
-// ══════════════════════════════════════════════════════════════════
-// MODULE / REPORT SWITCHING
-// ══════════════════════════════════════════════════════════════════
-function setModule(mod){
-  _module = mod;
-  ['Statements','Accounting','Audit','Market','Trading'].forEach(function(m){
-    var btn = document.getElementById('tab'+m);
-    var key = m.toLowerCase();
-    if(btn) btn.className = 'module-tab' + (key===mod ? ' active' : '');
-    var sb = document.getElementById('sb'+m);
-    if(sb) sb.style.display = key===mod ? 'block' : 'none';
-  });
-  // Reset active sb-item highlight
-  document.querySelectorAll('.sb-item').forEach(function(el,i){ el.className = i===0 ? 'sb-item active':'sb-item'; });
-  setReportType(mod, MODULE_REPORT_MAP[mod]);
-}
+// ── API Routes ────────────────────────────────────────────────────────────────
+app.use('/api/auth',    authRoutes);
+app.use('/api/reports', reportRoutes);
+app.use('/api/users',   userRoutes);
+app.use('/api/privacy', privacyRoutes);
 
-function setReportType(mod, type){
-  _module = mod; _reportType = type;
-  // Highlight clicked item within the visible section
-  var sb = document.getElementById('sb'+mod.charAt(0).toUpperCase()+mod.slice(1));
-  if(sb){
-    Array.from(sb.querySelectorAll('.sb-item')).forEach(function(el){ el.className='sb-item'; });
-    var clicked = Array.from(sb.querySelectorAll('.sb-item')).find(function(el){
-      return el.getAttribute('onclick') && el.getAttribute('onclick').indexOf("'"+type+"'") !== -1;
-    });
-    if(clicked) clicked.className = 'sb-item active';
+// ── Health & readiness endpoints (Render.com health check) ───────────────────
+app.get('/health', (req, res) => res.json({ status: 'ok', ts: new Date().toISOString() }));
+
+app.get('/ready', async (req, res) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.json({ status: 'ready', db: 'connected', ts: new Date().toISOString() });
+  } catch (err) {
+    res.status(503).json({ status: 'not_ready', db: 'disconnected', error: err.message });
   }
-  renderForm(type);
-}
-
-// ══════════════════════════════════════════════════════════════════
-// FORM BUILDER
-// ══════════════════════════════════════════════════════════════════
-function renderForm(type){
-  var report = REPORTS[type];
-  if(!report) return;
-
-  document.getElementById('wsTitle').textContent = report.title;
-  document.getElementById('wsSub').textContent = report.sub;
-
-  var fieldsHtml = report.fields.map(function(f){
-    var spanClass = f.span === 'half' ? '' : (f.span === 'three' ? '' : '');
-    var widthStyle = f.span === 'single' ? 'grid-column:1/-1' : '';
-    var inputHtml = '';
-    if(f.type === 'textarea'){
-      inputHtml = '<textarea class="field-textarea" id="f_'+f.id+'" placeholder="'+esc(f.placeholder||'')+'"></textarea>';
-    } else if(f.type === 'select'){
-      inputHtml = '<select class="field-select" id="f_'+f.id+'">' +
-        f.options.map(function(o){ return '<option value="'+esc(o)+'">'+esc(o)+'</option>'; }).join('') +
-        '</select>';
-    } else {
-      inputHtml = '<input type="text" class="field-input" id="f_'+f.id+'" placeholder="'+esc(f.placeholder||'')+'"/>';
-    }
-    return '<div style="'+widthStyle+'"><label class="field-label">'+esc(f.label)+'</label>'+inputHtml+'</div>';
-  });
-
-  // Group fields into rows of 2 (half) or full width (single)
-  var rowsHtml = '';
-  var i = 0;
-  while(i < report.fields.length){
-    var f = report.fields[i];
-    if(f.span === 'single'){
-      rowsHtml += '<div class="field-row single">' + fieldsHtml[i] + '</div>';
-      i++;
-    } else {
-      var pair = [fieldsHtml[i]];
-      if(report.fields[i+1] && report.fields[i+1].span === 'half'){
-        pair.push(fieldsHtml[i+1]);
-        i += 2;
-      } else {
-        i += 1;
-      }
-      rowsHtml += '<div class="field-row">' + pair.join('') + '</div>';
-    }
-  }
-
-  var genBtnStyle = (_module === 'trading') ? 'background:#FFB830;color:#0F2645' : '';
-  var genBtnLabel = (_module === 'trading') ? '&#x1F4B9; Run Trading Analysis' : '&#x2728; Generate Report';
-
-  var html = ''
-    + '<div class="panel"' + ((_module==='trading') ? ' style="border-color:rgba(255,184,48,.25)"' : '') + '>'
-    + '  <div class="panel-title">' + esc(report.title) + '</div>'
-    + '  <div class="panel-sub">' + esc(report.sub) + '</div>'
-    + (_module==='trading' ? '<div style="display:flex;align-items:center;gap:8px;padding:8px 12px;background:rgba(255,184,48,.07);border:1px solid rgba(255,184,48,.2);border-radius:8px;margin-bottom:14px"><span style="color:#FFB830;font-size:11px">&#x1F4E1;</span><span style="font-family:var(--mono);font-size:9.5px;color:#FFB830">Live market data will be fetched via web search to ground this analysis in real current prices.</span></div>' : '')
-    + rowsHtml
-    + '  <div style="display:flex;gap:10px;margin-top:6px">'
-    + '    <button class="btn btn-primary" id="genBtn" style="'+genBtnStyle+'" onclick="generateReport(\'' + type + '\')">' + genBtnLabel + '</button>'
-    + '    <button class="btn btn-ghost" onclick="clearForm()">Clear Form</button>'
-    + '  </div>'
-    + '</div>'
-    + '<div id="outputContainer"></div>';
-
-  document.getElementById('wsBody').innerHTML = html;
-}
-
-function clearForm(){
-  document.querySelectorAll('.field-input, .field-textarea').forEach(function(el){ el.value=''; });
-}
-
-function collectFormData(type){
-  var report = REPORTS[type];
-  var data = {};
-  report.fields.forEach(function(f){
-    var el = document.getElementById('f_'+f.id);
-    data[f.id] = el ? el.value.trim() : '';
-  });
-  return data;
-}
-
-// ══════════════════════════════════════════════════════════════════
-// REPORT GENERATION
-// ══════════════════════════════════════════════════════════════════
-var _lastReportText = '';
-var _lastReportTitle = '';
-
-function generateReport(type){
-  if(_generating) return;
-  if(!checkTrial()) return;
-
-  var report = REPORTS[type];
-  var data = collectFormData(type);
-
-  // Validate required text/select fields (not textarea) are filled
-  var missing = report.fields.filter(function(f){
-    return f.type !== 'textarea' && !data[f.id];
-  });
-  if(missing.length){
-    toast('Please fill in: ' + missing[0].label);
-    return;
-  }
-
-  _generating = true;
-  var btn = document.getElementById('genBtn');
-  if(btn){ btn.disabled = true; btn.textContent = '\u23F3 Generating\u2026'; }
-
-  var prompt = report.promptFn(data);
-  _lastReportTitle = (data.company || data.target || data.sector || report.title);
-
-  var container = document.getElementById('outputContainer');
-  container.innerHTML = '<div class="output-panel"><div class="output-header"><div class="output-header-title">&#x1F9EC; NexGen Ultra &mdash; Generating</div></div><div class="output-body" id="outputBody"><div style="font-family:var(--mono);font-size:11px;color:var(--muted)">Analysing inputs and drafting report\u2026</div></div></div>';
-
-  var isTrading = (_module === 'trading');
-
-  var XAI_SYSTEM = isTrading
-    ? 'You are NexGen Trading Agent, an elite AI market analyst and systematic trader built by Corverxis Technologies, powered by NexGen Ultra. You have access to a web search tool — ALWAYS use it to fetch current, live market prices and data before producing any analysis. Never rely on training data alone for prices or market conditions. You produce professional, actionable trade intelligence covering financial markets (equities, indices), currency markets (FX pairs, DXY), and commodity markets (energy, metals, agriculture, crypto). '+
-      'Always ground every forecast in CURRENT data from your search. Use precise numerical levels, clearly state directional bias, and include complete trade parameters. '+
-      'After your complete report, on a new line write exactly: ##XAI## then a new line, then "**Data sources & methodology**" with 2-3 sentences on what you searched and how you built the analysis, then a blank line, then "**Important disclaimer**" with 1-2 sentences that this is AI-generated analysis for educational purposes only and not financial advice — all trades involve risk of loss and users should consult a licensed financial advisor, then ##XAI## again on its own line.'
-    : 'You are NexGen Finance, an AI financial analyst built by Corverxis Technologies, powered by NexGen Ultra. You produce professional-grade financial statements, accounting documents, audit materials and market analysis. '+
-      'Always use proper accounting terminology, correctly formatted numbers (commas, parentheses for negatives, $ signs), and clean markdown tables for financial data. '+
-      'Be precise with calculations \u2014 numbers must foot and cross-check correctly. '+
-      'After your complete report, on a new line write exactly: ##XAI## then a new line, then "**How I approached this**" with 2-3 sentences on your methodology and what assumptions you made, then a blank line, then "**Confidence & verification**" with 1-2 sentences on what should be verified by a licensed CPA/CFA/auditor before relying on this for real decisions, then ##XAI## again on its own line. Never put the XAI block before or in the middle of the report \u2014 only at the very end.';
-
-  var fetchBody = {
-    model: 'claude-sonnet-4-6',
-    max_tokens: 4096,
-    system: XAI_SYSTEM,
-    messages: [{ role:'user', content: prompt }]
-  };
-
-  if(isTrading){
-    fetchBody.tools = [{ type: 'web_search_20250305', name: 'web_search' }];
-    // Show live data indicator
-    container.innerHTML = '<div class="output-panel" style="border-color:rgba(255,184,48,.3)"><div class="output-header" style="background:rgba(255,184,48,.06);border-color:rgba(255,184,48,.2)"><div class="output-header-title" style="color:#FFB830">&#x1F4E1; NexGen Trading Agent &mdash; Fetching Live Market Data&hellip;</div><div style="font-family:var(--mono);font-size:8.5px;color:#FFB830;opacity:.7">Searching real-time prices &bull; Analysing markets &bull; Building forecast</div></div><div class="output-body" id="outputBody"><div style="font-family:var(--mono);font-size:11px;color:var(--muted)">&#x1F50D; Searching live market data\u2026</div></div></div>';
-  }
-
-  fetch(API_BASE + '/api/reports/generate', {
-    method: 'POST',
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ module: _module.toUpperCase(), reportType: type, prompt: prompt, inputData: collectFormData() })
-  })
-  .then(function(r){
-    if(r.status === 401){ window.location.href = '/auth'; return null; }
-    if(r.status === 402){ return r.json().then(function(d){
-      alert('Trial limit reached. Upgrade to Pro for unlimited reports.'); return null;
-    }); }
-    return r.json();
-  })
-  .then(function(data){
-    if(!data) return;
-    var text = data.output || data.error || 'No response received.';
-    _lastReportText = text;
-    renderReportOutput(text, isTrading);
-    if(data.trialsRemaining !== null && data.trialsRemaining !== undefined){
-      var el = document.getElementById('trialCounter');
-      if(el) el.textContent = data.trialsRemaining + ' free reports left';
-    }
-  })
-  .catch(function(e){
-    document.getElementById('outputBody').innerHTML = '<div style="color:var(--red);font-size:12px">Error: '+esc(e.message)+'</div>';
-  })
-  .finally(function(){
-    _generating = false;
-    if(btn){ btn.disabled = false; btn.textContent = '\u2728 Generate Report'; }
-  });
-}
-
-function renderReportOutput(text, isTrading){
-  var marker = '##XAI##';
-  var i1 = text.indexOf(marker);
-  var i2 = i1 !== -1 ? text.indexOf(marker, i1+marker.length) : -1;
-  var mainText = text, xaiText = '';
-  if(i1 !== -1 && i2 !== -1){
-    mainText = text.slice(0, i1).trim();
-    xaiText = text.slice(i1+marker.length, i2).trim();
-  }
-
-  var panelBorder = isTrading ? 'border-color:rgba(255,184,48,.35)' : '';
-  var headerBg = isTrading ? 'background:rgba(255,184,48,.07);border-color:rgba(255,184,48,.25)' : '';
-  var headerTitle = isTrading
-    ? '<span style="color:#FFB830">&#x1F4B9; Trading Intelligence Report</span> <span style="font-size:8px;padding:2px 7px;background:rgba(255,184,48,.15);border:1px solid rgba(255,184,48,.3);border-radius:8px;color:#FFB830">LIVE DATA</span>'
-    : '&#x1F4C4; Report Output';
-
-  var html = '<div class="output-panel" style="'+panelBorder+'">'
-    + '<div class="output-header" style="'+headerBg+'">'
-    + '  <div class="output-header-title">'+headerTitle+'</div>'
-    + '  <div style="display:flex;gap:6px">'
-    + '    <button class="btn btn-ghost" style="padding:6px 12px;font-size:9px" onclick="exportPDF()">&#x1F4E5; PDF</button>'
-    + '    <button class="btn btn-ghost" style="padding:6px 12px;font-size:9px" onclick="copyReport()">&#x1F4CB; Copy</button>'
-    + '  </div>'
-    + '</div>'
-    + '<div class="output-body" id="outputBody">' + mdRender(mainText) + '</div>'
-    + '</div>';
-
-  document.getElementById('outputContainer').innerHTML = html;
-
-  if(xaiText){
-    var xaiIcon = isTrading ? '&#x1F4E1;' : '&#x1F9E0;';
-    var xaiLabel = isTrading ? 'Data Sources &amp; Disclaimer' : 'Explainable AI';
-    var xaiBorder = isTrading ? 'rgba(255,184,48,.2)' : 'rgba(155,121,255,.2)';
-    var xaiBg = isTrading ? 'rgba(255,184,48,.05)' : 'rgba(155,121,255,.07)';
-    var xaiColor = isTrading ? '#FFB830' : 'var(--violet)';
-    var xaiHtml = '<div class="xai-block" style="border-color:'+xaiBorder+';background:'+xaiBg+'"><div class="xai-header"><span>'+xaiIcon+'</span> <span style="color:'+xaiColor+'">'+xaiLabel+'</span></div>' + mdRender(xaiText) + '</div>';
-    document.getElementById('outputBody').insertAdjacentHTML('afterend', xaiHtml);
-  }
-
-  // Scroll into view
-  document.getElementById('outputContainer').scrollIntoView({behavior:'smooth', block:'start'});
-}
-
-function copyReport(){
-  navigator.clipboard.writeText(_lastReportText).then(function(){ toast('\u2713 Copied to clipboard'); });
-}
-
-function exportPDF(){
-  try{
-    var jsPDFCtor = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
-    var doc = new jsPDFCtor({ unit:'pt', format:'a4' });
-    var W = doc.internal.pageSize.getWidth();
-    var margin = 48;
-    var y = 60;
-
-    doc.setFont('helvetica','bold'); doc.setFontSize(18); doc.setTextColor(15,38,69);
-    doc.text(_lastReportTitle || 'Financial Report', margin, y); y += 22;
-    doc.setDrawColor(0,200,255); doc.setLineWidth(1.5); doc.line(margin, y, W-margin, y); y += 24;
-
-    doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(20,30,40);
-    var clean = _lastReportText.replace(/##XAI##[\s\S]*?##XAI##/,'').replace(/[#*`]/g,'');
-    var lines = doc.splitTextToSize(clean, W - margin*2);
-    lines.forEach(function(line){
-      if(y > 780){ doc.addPage(); y = 60; }
-      doc.text(line, margin, y);
-      y += 14;
-    });
-
-    doc.setFontSize(8); doc.setTextColor(150,150,150);
-    doc.text('NexGen Finance \u00b7 Corverxis Technologies \u00b7 ' + new Date().toLocaleDateString(), margin, 820);
-
-    var fname = (_lastReportTitle||'report').replace(/[^a-zA-Z0-9\s]/g,'').replace(/\s+/g,'-').toLowerCase().slice(0,50)+'.pdf';
-    doc.save(fname);
-    toast('\u2713 ' + fname + ' downloaded');
-  } catch(e){
-    toast('PDF error: ' + e.message);
-  }
-}
-
-// ══════════════════════════════════════════════════════════════════
-// MARKDOWN RENDERER
-// ══════════════════════════════════════════════════════════════════
-function esc(s){
-  return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function mdRender(text){
-  if(!text) return '';
-  var lines = text.split('\n');
-  var html = '';
-  var inTable = false, tableRows = [];
-  var inList = false, listType = '';
-
-  function flushTable(){
-    if(!tableRows.length) return;
-    var header = tableRows[0];
-    var bodyRows = tableRows.slice(2); // skip separator row
-    html += '<table><thead><tr>' + header.map(function(c){ return '<th>'+inline(c)+'</th>'; }).join('') + '</tr></thead><tbody>';
-    bodyRows.forEach(function(row){
-      html += '<tr>' + row.map(function(c){ return '<td>'+inline(c)+'</td>'; }).join('') + '</tr>';
-    });
-    html += '</tbody></table>';
-    tableRows = []; inTable = false;
-  }
-  function flushList(){
-    if(!inList) return;
-    html += listType === 'ol' ? '</ol>' : '</ul>';
-    inList = false;
-  }
-  function inline(s){
-    return esc(s).replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>').replace(/\*(.+?)\*/g,'<em>$1</em>').replace(/`(.+?)`/g,'<code>$1</code>');
-  }
-
-  lines.forEach(function(line){
-    var t = line.trim();
-    if(/^\|.*\|$/.test(t)){
-      inTable = true;
-      var cells = t.split('|').slice(1,-1).map(function(c){ return c.trim(); });
-      tableRows.push(cells);
-      return;
-    } else if(inTable){ flushTable(); }
-
-    if(/^### /.test(t)){ flushList(); html += '<h3>'+inline(t.slice(4))+'</h3>'; return; }
-    if(/^## /.test(t)){ flushList(); html += '<h2>'+inline(t.slice(3))+'</h2>'; return; }
-    if(/^# /.test(t)){ flushList(); html += '<h1>'+inline(t.slice(2))+'</h1>'; return; }
-
-    if(/^[-*] /.test(t)){
-      if(!inList || listType!=='ul'){ flushList(); html+='<ul>'; inList=true; listType='ul'; }
-      html += '<li>'+inline(t.slice(2))+'</li>'; return;
-    }
-    if(/^\d+\. /.test(t)){
-      if(!inList || listType!=='ol'){ flushList(); html+='<ol>'; inList=true; listType='ol'; }
-      html += '<li>'+inline(t.replace(/^\d+\.\s*/,''))+'</li>'; return;
-    }
-    flushList();
-    if(t) html += '<p>'+inline(t)+'</p>';
-  });
-  flushTable(); flushList();
-  return html;
-}
-
-// ══════════════════════════════════════════════════════════════════
-// TRIAL / PLAN GATING — managed by backend, not localStorage
-// ══════════════════════════════════════════════════════════════════
-function checkTrial(){
-  // Gate is enforced server-side; this is just a client-side UX hint
-  if (!_user) return false;
-  if (_user.plan === 'PRO' || _user.plan === 'ENTERPRISE') return true;
-  if (_user.trialUsed >= _user.trialMax) {
-    document.getElementById('upgradeWall').classList.add('on');
-    return false;
-  }
-  return true;
-}
-
-function incrementTrial(){
-  // Trial count is incremented by the backend on successful generation
-  // Update local user state optimistically for immediate UI feedback
-  if (_user && _user.plan === 'FREE') {
-    _user.trialUsed = (_user.trialUsed || 0) + 1;
-    updateTrialDisplay(_user);
-  }
-}
-
-function upgradeTo(plan){
-  var links = {
-    starter: 'https://buy.stripe.com/PLACEHOLDER_STARTER',
-    pro:     'https://buy.stripe.com/PLACEHOLDER_PRO'
-  };
-  window.open(links[plan] || 'mailto:support@corverxis.com', '_blank');
-}
-
-// ══════════════════════════════════════════════════════════════════
-// TOAST
-// ══════════════════════════════════════════════════════════════════
-function toast(msg){
-  var t = document.getElementById('toast');
-  if(!t) return;
-  t.textContent = msg; t.style.opacity = '1';
-  clearTimeout(t._t); t._t = setTimeout(function(){ t.style.opacity = '0'; }, 3200);
-}
-
-// Init first form on load
-document.addEventListener('DOMContentLoaded', function(){
-  renderForm('income');
-  checkAuth();
 });
-</script>
-<script>
-'use strict';
-// ══════════════════════════════════════════════════════════════════
-// BACKEND AUTH — JWT + OAuth2 via /api/auth/*
-// ══════════════════════════════════════════════════════════════════
 
-// Check session on load — redirect to /auth.html if not authenticated
-window.checkAuth = async function() {
-  // Clear any ?error= from URL immediately before anything else
-  var params = new URLSearchParams(window.location.search);
-  var oauthError = params.get('error');
-  if (window.location.search) {
-    history.replaceState(null, '', window.location.pathname);
-  }
-
-  try {
-    var r = await fetch(API_BASE + '/api/auth/me', { credentials: 'include' });
-
-    if (r.ok) {
-      var user = await r.json();
-      onSignedIn(user);
-      return;
-    }
-
-    // Not authenticated — show auth wall
-    var wall = document.getElementById('authWall');
-    if (wall) wall.style.display = 'flex';
-    var signInBtn = document.getElementById('signInBtn');
-    if (signInBtn) signInBtn.style.display = 'inline-flex';
-
-    // Only show error toast if it's a real server-side error (not "not configured")
-    if (oauthError && oauthError !== 'microsoft_not_configured'
-        && oauthError !== 'github_not_configured'
-        && oauthError !== 'google_not_configured') {
-      var msgs = {
-        oauth_failed:    'Sign-in failed — no email returned by provider.',
-        server_error:    'A server error occurred. Please try again.',
-        google_failed:   'Google sign-in failed. Please try again.',
-        github_failed:   'GitHub sign-in failed. Please try again.',
-        microsoft_failed:'Microsoft sign-in failed. Please try again.',
-      };
-      setTimeout(function(){
-        toast('\u26A0 ' + (msgs[oauthError] || 'Sign-in error. Please try again.'));
-      }, 300);
-    }
-  } catch (e) {
-    var wall = document.getElementById('authWall');
-    if (wall) wall.style.display = 'flex';
-  }
-};
-
-// Called once user is confirmed signed in
-window.onSignedIn = function(user) {
-  _user = user;
-  var name = (user.name || user.email || 'User').split(' ')[0];
-
-  // Hide auth wall
-  var wall = document.getElementById('authWall');
-  if (wall) wall.style.display = 'none';
-
-  // Show user pill with name + sign-out title
-  var pill = document.getElementById('userPill');
-  if (pill) {
-    pill.textContent = name + ' \u2192';
-    pill.style.display = 'inline-flex';
-    pill.title = 'Signed in as ' + (user.email || '') + ' \u2014 click to sign out';
-  }
-
-  // Hide generic sign-in button
-  var signInBtn = document.getElementById('signInBtn');
-  if (signInBtn) signInBtn.style.display = 'none';
-
-  // Hide MFA nav button (MFA managed by OAuth provider)
-  var mfaBtn = document.getElementById('mfaNavBtn');
-  if (mfaBtn) mfaBtn.style.display = 'none';
-
-  // Update trial counter
-  updateTrialDisplay(user);
-
-  toast('Welcome back, ' + name + ' \u2713');
-};
-
-// Update trial / plan display in topbar
-window.updateTrialDisplay = function(userOrRemaining) {
-  var el = document.getElementById('trialCountNav');
-  if (!el) return;
-
-  var remaining, plan;
-  if (typeof userOrRemaining === 'object') {
-    plan      = userOrRemaining.plan;
-    remaining = Math.max(0, (userOrRemaining.trialMax || 10) - (userOrRemaining.trialUsed || 0));
-  } else {
-    plan      = _user ? _user.plan : 'FREE';
-    remaining = userOrRemaining;
-  }
-
-  if (plan === 'FREE') {
-    el.textContent = remaining + ' free report' + (remaining !== 1 ? 's' : '') + ' left';
-    el.style.display = 'inline-block';
-    if (remaining <= 3) {
-      el.style.borderColor = remaining === 0 ? 'rgba(255,92,92,.4)' : 'rgba(255,184,48,.4)';
-      el.style.color       = remaining === 0 ? 'var(--red)' : 'var(--amber)';
-      el.style.background  = remaining === 0 ? 'rgba(255,92,92,.08)' : 'rgba(255,184,48,.08)';
-    }
-  } else {
-    el.textContent = plan + ' Plan';
-    el.style.display    = 'inline-block';
-    el.style.color      = 'var(--green)';
-    el.style.borderColor = 'rgba(0,200,150,.3)';
-    el.style.background  = 'rgba(0,200,150,.08)';
-  }
-};
-
-// Collect all visible form field values for API payload
-window.collectFormData = function() {
-  var data = {};
-  document.querySelectorAll('.field-input, .field-select, .field-textarea').forEach(function(el) {
-    if (el.id) data[el.id] = el.value || '';
+// ── Compliance endpoint ───────────────────────────────────────────────────────
+app.get('/api/compliance/status', (req, res) => {
+  res.json({
+    soc2:        'Type II — Controls implemented',
+    sec:         `Rule 17a-4 — ${config.compliance.secRetentionYears}-year retention enforced`,
+    gdpr:        'Article 5, 6, 7, 17, 20, 25, 32 — Implemented',
+    ccpa:        'Section 1798.100-1798.199 — Implemented',
+    encryption:  'AES-256-GCM at rest, TLS 1.3 in transit',
+    auditTrail:  'Tamper-evident SHA-256 chained audit log',
+    policyVer:   config.compliance.policyVersion,
+    dpo:         config.compliance.dpoEmail,
   });
-  return data;
-};
+});
 
-// Sign out — revoke session via backend, redirect to auth wall
-window.signOut = async function() {
+// ── Static frontend ───────────────────────────────────────────────────────────
+const frontendPath = path.join(__dirname, '../frontend/public');
+app.use(express.static(frontendPath, {
+  maxAge:  config.isProd() ? '1d' : 0,
+  etag:    true,
+  setHeaders(res, filePath) {
+    if (filePath.endsWith('.html')) {
+      res.setHeader('Cache-Control', 'no-store'); // Never cache HTML
+    }
+  },
+}));
+
+// SPA fallback — all non-API routes serve index.html
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api/')) return next();
+  res.sendFile(path.join(frontendPath, 'index.html'));
+});
+
+// ── Error handler ─────────────────────────────────────────────────────────────
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+  logger.error('Unhandled error', {
+    error:     err.message,
+    stack:     config.isProd() ? undefined : err.stack,
+    path:      req.path,
+    requestId: req.requestId,
+  });
+
+  const status = err.status || err.statusCode || 500;
+  res.status(status).json({
+    error:     config.isProd() ? 'An unexpected error occurred' : err.message,
+    requestId: req.requestId,
+  });
+});
+
+// ── Scheduled jobs ────────────────────────────────────────────────────────────
+
+// Purge expired sessions daily at 02:00 UTC (SOC2 CC6.2)
+cron.schedule('0 2 * * *', async () => {
   try {
-    await fetch(API_BASE + '/api/auth/logout', {
-      method: 'POST',
-      credentials: 'include'
+    const { count } = await prisma.session.deleteMany({
+      where: { OR: [{ refreshExpiry: { lt: new Date() } }, { isRevoked: true, updatedAt: { lt: new Date(Date.now() - 30 * 86_400_000) } }] },
     });
-  } catch (e) { /* ignore network errors on logout */ }
+    logger.info(`Cron: purged ${count} expired sessions`);
+  } catch (err) {
+    logger.error('Cron session purge failed', { error: err.message });
+  }
+});
 
-  _user = null;
-
-  // Reset UI
-  var pill = document.getElementById('userPill');
-  if (pill) pill.style.display = 'none';
-  var signInBtn = document.getElementById('signInBtn');
-  if (signInBtn) signInBtn.style.display = 'inline-flex';
-  var trialEl = document.getElementById('trialCountNav');
-  if (trialEl) trialEl.style.display = 'none';
-
-  // Show auth wall
-  var wall = document.getElementById('authWall');
-  if (wall) wall.style.display = 'flex';
-
-  toast('Signed out successfully');
-};
-
-// Refresh access token silently using refresh token cookie
-window.refreshAuth = async function() {
+// ── Bootstrap ─────────────────────────────────────────────────────────────────
+async function bootstrap() {
   try {
-    var r = await fetch(API_BASE + '/api/auth/refresh', {
-      method: 'POST',
-      credentials: 'include'
+    await prisma.$connect();
+    logger.info('Database connected');
+
+    await auditService.init();
+    logger.info('Audit service ready');
+
+    app.listen(config.port, () => {
+      logger.info(`NexGen Finance running`, {
+        port: config.port,
+        env:  config.env,
+        url:  `http://localhost:${config.port}`,
+      });
     });
-    if (r.ok) return true;
-  } catch (e) {}
-  return false;
-};
+  } catch (err) {
+    logger.error('Bootstrap failed', { error: err.message });
+    process.exit(1);
+  }
+}
 
-// ── Stub out / disable Supabase-dependent functions ──────────────────────────
-// MFA is now handled by the OAuth provider (Google/GitHub/Microsoft)
+// Graceful shutdown
+async function shutdown(signal) {
+  logger.info(`${signal} received — shutting down gracefully`);
+  await prisma.$disconnect();
+  process.exit(0);
+}
 
-window.authTab        = function() {};
-window.showAuth       = function() {
-  var wall = document.getElementById('authWall');
-  if (wall) wall.style.display = 'flex';
-};
-window.closeAuth      = function() {
-  var wall = document.getElementById('authWall');
-  if (wall) wall.style.display = 'none';
-};
-window.doSignIn       = function() { window.location.href = '/auth.html'; };
-window.doSignUp       = function() { window.location.href = '/auth.html'; };
-window.forgotPassword = function() {
-  toast('Password reset is managed by your OAuth provider (Google / GitHub / Microsoft).');
-};
-window.upgradeTo = function(plan) {
-  toast('Upgrade to ' + plan.toUpperCase() + ': contact support@corverxis.com');
-};
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT',  () => shutdown('SIGINT'));
+process.on('uncaughtException',  (err) => { logger.error('Uncaught exception',  { error: err.message, stack: err.stack }); process.exit(1); });
+process.on('unhandledRejection', (err) => { logger.error('Unhandled rejection', { error: String(err) }); });
 
-// MFA stubs — managed by OAuth provider
-window.nxMFACheck        = function(s, cb) { if (cb) cb(); };
-window.nxMFACancel       = function() { signOut(); };
-window.nxMFAVerify       = function() { toast('MFA is managed by your OAuth provider.'); };
-window.nxMFALoadStatus   = function() {
-  var el = document.getElementById('nxMFAStatusLoading');
-  if (el) el.textContent = 'MFA is managed by your OAuth provider (Google / GitHub / Microsoft). Configure it there.';
-};
-window.nxMFAStartEnroll  = function() { toast('Configure MFA in your Google, GitHub, or Microsoft account settings.'); };
-window.nxMFAConfirmEnroll = function() {};
-window.nxMFADisable      = function() { toast('Disable MFA in your OAuth provider account settings.'); };
-window.openPrivacy        = function() {
-  var m = document.getElementById('nfPolicyModal');
-  if (m) { m.style.display = 'flex'; document.body.style.overflow = 'hidden'; }
-};
-</script>
+bootstrap();
 
-<!-- ══════════════════════════════════════════════════════════ -->
-<!-- PRIVACY POLICY + TERMS MODAL                                -->
-<!-- ══════════════════════════════════════════════════════════ -->
-<div id="nfPolicyModal" style="display:none;position:fixed;inset:0;background:rgba(15,38,69,.95);z-index:999999;align-items:flex-start;justify-content:center;padding:24px 16px;overflow-y:auto;backdrop-filter:blur(16px)">
-  <div style="background:var(--panel);border:1px solid var(--b3);border-radius:14px;max-width:680px;width:100%;margin:auto;position:relative">
-    <button onclick="closePrivacy()" style="position:absolute;top:16px;right:16px;width:30px;height:30px;border-radius:7px;background:var(--a2);border:1px solid var(--b2);color:var(--accent);font-size:14px;cursor:pointer">&#x2715;</button>
-    <div style="padding:36px 40px 40px">
-      <div style="font-family:var(--mono);font-size:9px;color:var(--accent);letter-spacing:3px;text-transform:uppercase;margin-bottom:8px">Legal</div>
-      <h2 style="font-size:22px;font-weight:800;color:#fff;margin-bottom:4px">Privacy Policy &amp; Terms of Service</h2>
-      <div style="font-family:var(--mono);font-size:9px;color:var(--muted);margin-bottom:28px">NexGen Finance &nbsp;&middot;&nbsp; Corverxis Technologies Ltd</div>
-
-      <div style="font-size:12.5px;color:var(--dim);line-height:1.85">
-        <div style="font-size:15px;font-weight:700;color:#fff;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--b2)">&#x1F512; Privacy Policy</div>
-
-        <div style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin:12px 0 6px">1. Who We Are</div>
-        <p style="margin:0 0 10px">NexGen Finance is operated by <strong style="color:#fff">Corverxis Technologies Ltd</strong>. Contact <strong style="color:#fff">support@corverxis.com</strong> for privacy enquiries.</p>
-
-        <div style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin:12px 0 6px">2. Information We Collect</div>
-        <p style="margin:0 0 6px"><strong style="color:#fff">Account data:</strong> Name, email, encrypted password.</p>
-        <p style="margin:0 0 6px"><strong style="color:#fff">Financial data you submit:</strong> Figures and descriptions entered to generate reports. Processed to produce your output and not used for any purpose beyond your session unless saved by you.</p>
-        <p style="margin:0 0 10px"><strong style="color:#fff">Usage data:</strong> Anonymous platform metrics to improve performance.</p>
-
-        <div style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin:12px 0 6px">3. AI Processing</div>
-        <p style="margin:0 0 10px">NexGen Finance is powered by <strong style="color:#fff">NexGen Ultra</strong>, Corverxis Technologies' proprietary AI engine. Your data is processed securely within the NexGen infrastructure and is not sold or shared with unauthorised third parties.</p>
-
-        <div style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin:12px 0 6px">4. Your Rights</div>
-        <p style="margin:0 0 10px">You may request access, correction, or deletion of your data at any time by emailing <strong style="color:#fff">support@corverxis.com</strong>.</p>
-
-        <div style="font-size:15px;font-weight:700;color:#fff;margin:16px 0 12px;padding:14px 0 8px;border-top:1px solid var(--b2);border-bottom:1px solid var(--b2)">&#x1F4CB; Terms of Service</div>
-
-        <div style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin:12px 0 6px">1. Not Professional Advice</div>
-        <p style="margin:0 0 10px"><strong style="color:#fff">Reports generated by NexGen Finance are AI-generated drafts and do not constitute accounting, audit, tax, legal or investment advice.</strong> All outputs must be reviewed and verified by a licensed CPA, CFA, auditor or appropriate professional before being relied upon for any financial, regulatory or investment decision. Corverxis Technologies accepts no liability for decisions made based on AI-generated output.</p>
-
-        <div style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin:12px 0 6px">2. Acceptance &amp; Permitted Use</div>
-        <p style="margin:0 0 10px">By creating an account you agree to these Terms. Use the platform only for lawful purposes; do not reverse-engineer or extract the underlying models.</p>
-
-        <div style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin:12px 0 6px">3. Billing</div>
-        <p style="margin:0 0 10px">Paid plans are billed monthly via Stripe. Cancel anytime; access continues until the end of the billing period.</p>
-
-        <div style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin:12px 0 6px">4. Limitation of Liability</div>
-        <p style="margin:0 0 10px">Corverxis's total liability for any claim shall not exceed the amount paid in the 3 months preceding the claim.</p>
-
-        <div style="font-size:11px;font-weight:700;color:var(--accent);letter-spacing:1px;text-transform:uppercase;margin:12px 0 6px">5. Governing Law</div>
-        <p style="margin:0 0 16px">These Terms are governed by the laws of the <strong style="color:#fff">State of Delaware, United States</strong>. Disputes are subject to the exclusive jurisdiction of the courts of Delaware.</p>
-
-        <div style="background:var(--a2);border:1px solid var(--b2);border-radius:8px;padding:14px 16px">
-          <div style="font-size:11px;font-weight:700;color:#fff;margin-bottom:5px">Contact</div>
-          <div style="font-size:11.5px;color:var(--dim)">Corverxis Technologies Ltd &nbsp;&middot;&nbsp; <strong style="color:#fff">support@corverxis.com</strong></div>
-        </div>
-      </div>
-
-      <button onclick="closePrivacy()" class="btn btn-primary" style="width:100%;justify-content:center;margin-top:22px">I Understand &mdash; Close</button>
-    </div>
-  </div>
-</div>
-<script>
-function openPrivacy(){ document.getElementById('nfPolicyModal').style.display='flex'; document.body.style.overflow='hidden'; }
-function closePrivacy(){ document.getElementById('nfPolicyModal').style.display='none'; document.body.style.overflow=''; }
-document.addEventListener('keydown',function(e){ if(e.key==='Escape') closePrivacy(); });
-</script>
-</body></html>
+module.exports = app; // for testing
