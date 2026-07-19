@@ -63,7 +63,6 @@ app.use(session({
 // ── Passport ──────────────────────────────────────────────────────────────────
 configurePassport();
 app.use(passport.initialize());
-app.use(passport.session());
 
 // ── API Routes ────────────────────────────────────────────────────────────────
 app.use('/api/auth',    authRoutes);
