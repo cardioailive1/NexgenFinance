@@ -52,17 +52,17 @@ const config = {
     google: {
       clientId:     optional('GOOGLE_CLIENT_ID'),
       clientSecret: optional('GOOGLE_CLIENT_SECRET'),
-      callbackUrl:  optional('GOOGLE_CALLBACK_URL'),
+      callbackUrl:  optional('GOOGLE_CALLBACK_URL', 'https://nexgen-finance.onrender.com/api/auth/google/callback'),
     },
     github: {
       clientId:     optional('GITHUB_CLIENT_ID'),
       clientSecret: optional('GITHUB_CLIENT_SECRET'),
-      callbackUrl:  optional('GITHUB_CALLBACK_URL'),
+      callbackUrl:  optional('GITHUB_CALLBACK_URL', 'https://nexgen-finance.onrender.com/api/auth/github/callback'),
     },
     microsoft: {
       clientId:     optional('MICROSOFT_CLIENT_ID'),
       clientSecret: optional('MICROSOFT_CLIENT_SECRET'),
-      callbackUrl:  optional('MICROSOFT_CALLBACK_URL'),
+      callbackUrl:  optional('MICROSOFT_CALLBACK_URL', 'https://nexgen-finance.onrender.com/api/auth/microsoft/callback'),
       tenantId:     optional('MICROSOFT_TENANT_ID', 'common'),
     },
   },
