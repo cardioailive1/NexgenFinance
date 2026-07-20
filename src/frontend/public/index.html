@@ -119,8 +119,11 @@ a{color:inherit}
 .pill-red{background:rgba(255,92,92,.12);border:1px solid rgba(255,92,92,.3);color:var(--red)}
 .pill-accent{background:var(--a2);border:1px solid var(--b2);color:var(--accent)}
 
-/* ── AUTH WALL ── */
+/* ── AUTH WALL (now a top banner, not a full-screen overlay) ── */
 #authWall{display:none;position:fixed;inset:0;background:rgba(15,38,69,.97);z-index:99999;align-items:flex-start;justify-content:center;backdrop-filter:blur(20px);padding:24px 20px;overflow-y:auto}
+/* ── SIGNIN BANNER (shown when not logged in) ── */
+#signinBanner{display:none;background:rgba(0,200,255,.08);border-bottom:1px solid rgba(0,200,255,.2);padding:8px 20px;flex-shrink:0;align-items:center;gap:12px}
+#signinBanner.visible{display:flex}
 .auth-inner{max-width:920px;width:100%;margin:auto}
 .auth-brand-header{display:flex;align-items:center;gap:14px;margin-bottom:24px}
 .auth-tabs{display:flex;background:var(--bg);border-radius:8px;padding:3px;margin-bottom:16px;border:1px solid var(--b)}
@@ -179,6 +182,14 @@ a{color:inherit}
     <button id="signInBtn" onclick="showAuth('up')" class="nav-btn primary">Get Access</button>
     <button id="userPill" onclick="signOut()" style="display:none;padding:6px 13px;background:transparent;border:1px solid var(--b2);color:var(--accent);border-radius:6px;font-family:var(--mono);font-size:9px;cursor:pointer" title="Click to sign out"></button>
   </div>
+</div>
+
+<!-- ── SIGNIN BANNER ── -->
+<div id="signinBanner">
+  <span style="font-family:var(--mono);font-size:11px;color:var(--dim)">&#x1F512; Sign in to generate AI reports</span>
+  <a href="/api/auth/google" style="padding:5px 14px;background:var(--accent);color:var(--bg);border-radius:6px;font-family:var(--mono);font-size:10px;font-weight:700;text-decoration:none">Sign in with Google</a>
+  <a href="/api/auth/github" style="padding:5px 14px;background:#24292F;color:#fff;border-radius:6px;font-family:var(--mono);font-size:10px;font-weight:700;text-decoration:none">GitHub</a>
+  <a href="/api/auth/microsoft" style="padding:5px 14px;background:#00A4EF;color:#fff;border-radius:6px;font-family:var(--mono);font-size:10px;font-weight:700;text-decoration:none">Microsoft</a>
 </div>
 
 <!-- ══════════════════════════════════════════════════════════ -->
@@ -1112,18 +1123,27 @@ var _lastReportText = '';
 var _lastReportTitle = '';
 
 function generateReport(type){
-  if(_generating) return;
-  if(!checkTrial()) return;
+  if(_generating){ toast('Already generating, please wait\u2026'); return; }
+
+  // Auth check with visible feedback
+  if(!_user){
+    toast('\u26A0 Please sign in first');
+    var wall = document.getElementById('authWall');
+    if(wall) wall.style.display = 'flex';
+    return;
+  }
 
   var report = REPORTS[type];
+  if(!report){ toast('Report type not found: ' + type); return; }
+
   var data = collectFormData(type);
 
-  // Validate required text/select fields (not textarea) are filled
+  // Validate required fields
   var missing = report.fields.filter(function(f){
     return f.type !== 'textarea' && !data[f.id];
   });
   if(missing.length){
-    toast('Please fill in: ' + missing[0].label);
+    toast('\u26A0 Please fill in: ' + missing[0].label);
     return;
   }
 
@@ -1134,14 +1154,11 @@ function generateReport(type){
   var prompt = report.promptFn(data);
   _lastReportTitle = (data.company || data.target || data.sector || report.title);
 
-  var container = document.getElementById('outputContainer');
-  container.innerHTML = '<div class="output-panel"><div class="output-header"><div class="output-header-title">&#x1F9EC; NexGen Ultra &mdash; Generating</div></div><div class="output-body" id="outputBody"><div style="font-family:var(--mono);font-size:11px;color:var(--muted)">Analysing inputs and drafting report\u2026</div></div></div>';
-
   var isTrading = (_module === 'trading');
-
-  if(isTrading){
-    container.innerHTML = '<div class="output-panel" style="border-color:rgba(255,184,48,.3)"><div class="output-header" style="background:rgba(255,184,48,.06);border-color:rgba(255,184,48,.2)"><div class="output-header-title" style="color:#FFB830">&#x1F4E1; NexGen Trading Agent &mdash; Fetching Live Market Data&hellip;</div><div style="font-family:var(--mono);font-size:8.5px;color:#FFB830;opacity:.7">Searching real-time prices &bull; Analysing markets &bull; Building forecast</div></div><div class="output-body" id="outputBody"><div style="font-family:var(--mono);font-size:11px;color:var(--muted)">&#x1F50D; Searching live market data\u2026</div></div></div>';
-  }
+  var container = document.getElementById('outputContainer');
+  container.innerHTML = '<div class="output-panel"><div class="output-header"><div class="output-header-title">'
+    + (isTrading ? '&#x1F4E1; Trading Agent &mdash; Fetching live data&hellip;' : '&#x1F9EC; NexGen Ultra &mdash; Generating')
+    + '</div></div><div class="output-body" id="outputBody"><div style="font-family:var(--mono);font-size:11px;color:var(--muted)">Analysing inputs and building report\u2026</div></div></div>';
 
   fetch(API_BASE + '/api/reports/generate', {
     method: 'POST',
@@ -1150,28 +1167,44 @@ function generateReport(type){
     body: JSON.stringify({ module: _module.toUpperCase(), reportType: type, prompt: prompt, inputData: data })
   })
   .then(function(r){
-    if(r.status === 401){ window.location.href = '/auth'; return null; }
-    if(r.status === 402){ return r.json().then(function(d){
-      alert('Trial limit reached. Upgrade to Pro for unlimited reports.'); return null;
-    }); }
+    if(r.status === 401){
+      _user = null;
+      document.getElementById('outputBody').innerHTML = '<div style="color:var(--amber);font-size:13px;padding:10px">&#x26A0; Session expired. <a href="/api/auth/google" style="color:var(--accent)">Sign in again</a></div>';
+      return null;
+    }
+    if(r.status === 402){
+      document.getElementById('outputBody').innerHTML = '<div style="color:var(--amber);font-size:13px;padding:10px">&#x26A0; Trial limit reached. Upgrade to Pro for unlimited reports.</div>';
+      return null;
+    }
+    if(!r.ok){
+      return r.json().then(function(e){
+        document.getElementById('outputBody').innerHTML = '<div style="color:var(--red);font-size:13px;padding:10px">&#x274C; Server error: ' + esc((e&&e.error)||r.status) + '</div>';
+        return null;
+      }).catch(function(){
+        document.getElementById('outputBody').innerHTML = '<div style="color:var(--red);font-size:13px;padding:10px">&#x274C; Server error ' + r.status + '</div>';
+        return null;
+      });
+    }
     return r.json();
   })
   .then(function(data){
     if(!data) return;
-    var text = data.output || data.error || 'No response received.';
+    var text = data.output || (data.error ? '**Error:** ' + data.error : 'No content returned.');
     _lastReportText = text;
     renderReportOutput(text, isTrading);
     if(data.trialsRemaining !== null && data.trialsRemaining !== undefined){
-      var el = document.getElementById('trialCounter');
-      if(el) el.textContent = data.trialsRemaining + ' free reports left';
+      updateTrialDisplay(data.trialsRemaining);
     }
+    if(_user){ _user.trialUsed = (_user.trialUsed||0) + 1; }
   })
   .catch(function(e){
-    document.getElementById('outputBody').innerHTML = '<div style="color:var(--red);font-size:12px">Error: '+esc(e.message)+'</div>';
+    var ob = document.getElementById('outputBody');
+    if(ob) ob.innerHTML = '<div style="color:var(--red);font-size:13px;padding:10px">&#x274C; Network error: ' + esc(e.message) + '</div>';
   })
   .finally(function(){
     _generating = false;
-    if(btn){ btn.disabled = false; btn.textContent = '\u2728 Generate Report'; }
+    var b = document.getElementById('genBtn');
+    if(b){ b.disabled = false; b.textContent = _module==='trading' ? '&#x1F4B9; Run Trading Analysis' : '&#x2728; Generate Report'; }
   });
 }
 
@@ -1360,6 +1393,7 @@ function toast(msg){
 // Init on load
 document.addEventListener('DOMContentLoaded', function(){
   setModule('statements');
+  // Check auth in background — app is always visible
   checkAuth();
 });
 </script>
@@ -1371,46 +1405,28 @@ document.addEventListener('DOMContentLoaded', function(){
 
 // Check session on load — redirect to /auth.html if not authenticated
 window.checkAuth = async function() {
-  // Clear any ?error= from URL immediately before anything else
+  // Clear any OAuth error from URL
   var params = new URLSearchParams(window.location.search);
   var oauthError = params.get('error');
-  if (window.location.search) {
-    history.replaceState(null, '', window.location.pathname);
-  }
+  if (window.location.search) history.replaceState(null, '', window.location.pathname);
 
   try {
     var r = await fetch(API_BASE + '/api/auth/me', { credentials: 'include' });
-
     if (r.ok) {
       var user = await r.json();
       onSignedIn(user);
       return;
     }
+  } catch(e) { /* network error — show banner */ }
 
-    // Not authenticated — show auth wall
-    var wall = document.getElementById('authWall');
-    if (wall) wall.style.display = 'flex';
-    var signInBtn = document.getElementById('signInBtn');
-    if (signInBtn) signInBtn.style.display = 'inline-flex';
+  // Not signed in — show banner, keep app usable
+  var banner = document.getElementById('signinBanner');
+  if (banner) banner.classList.add('visible');
 
-    // Only show error toast if it's a real server-side error (not "not configured")
-    if (oauthError && oauthError !== 'microsoft_not_configured'
-        && oauthError !== 'github_not_configured'
-        && oauthError !== 'google_not_configured') {
-      var msgs = {
-        oauth_failed:    'Sign-in failed — no email returned by provider.',
-        server_error:    'A server error occurred. Please try again.',
-        google_failed:   'Google sign-in failed. Please try again.',
-        github_failed:   'GitHub sign-in failed. Please try again.',
-        microsoft_failed:'Microsoft sign-in failed. Please try again.',
-      };
-      setTimeout(function(){
-        toast('\u26A0 ' + (msgs[oauthError] || 'Sign-in error. Please try again.'));
-      }, 300);
-    }
-  } catch (e) {
-    var wall = document.getElementById('authWall');
-    if (wall) wall.style.display = 'flex';
+  if (oauthError && oauthError !== 'provider_not_configured') {
+    setTimeout(function(){
+      toast('\u26A0 Sign-in error. Please try again.');
+    }, 300);
   }
 };
 
@@ -1419,11 +1435,15 @@ window.onSignedIn = function(user) {
   _user = user;
   var name = (user.name || user.email || 'User').split(' ')[0];
 
-  // Hide auth wall
+  // Hide auth wall if it was shown
   var wall = document.getElementById('authWall');
   if (wall) wall.style.display = 'none';
 
-  // Show user pill with name + sign-out title
+  // Hide signin banner
+  var banner = document.getElementById('signinBanner');
+  if (banner) banner.classList.remove('visible');
+
+  // Show user pill
   var pill = document.getElementById('userPill');
   if (pill) {
     pill.textContent = name + ' \u2192';
@@ -1431,17 +1451,13 @@ window.onSignedIn = function(user) {
     pill.title = 'Signed in as ' + (user.email || '') + ' \u2014 click to sign out';
   }
 
-  // Hide generic sign-in button
   var signInBtn = document.getElementById('signInBtn');
   if (signInBtn) signInBtn.style.display = 'none';
 
-  // Hide MFA nav button (MFA managed by OAuth provider)
   var mfaBtn = document.getElementById('mfaNavBtn');
   if (mfaBtn) mfaBtn.style.display = 'none';
 
-  // Update trial counter
   updateTrialDisplay(user);
-
   toast('Welcome back, ' + name + ' \u2713');
 };
 
