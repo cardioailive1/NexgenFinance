@@ -11,24 +11,12 @@ const logger      = require('../utils/logger');
  * SOC2 CC6.6 — Restricts access to information assets
  */
 const helmetMiddleware = helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc:  ["'self'"],
-      scriptSrc:   ["'self'", "'unsafe-inline'", 'https://cdn.jsdelivr.net', 'https://cdnjs.cloudflare.com'],
-      styleSrc:    ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
-      fontSrc:     ["'self'", 'https://fonts.gstatic.com'],
-      imgSrc:      ["'self'", 'data:', 'https:'],
-      connectSrc:  ["'self'"],
-      frameSrc:    ["'none'"],
-      objectSrc:   ["'none'"],
-      upgradeInsecureRequests: config.isProd() ? [] : null,
-    },
-  },
+  contentSecurityPolicy: false, // Disabled — inline onclick handlers in SPA need unsafe-inline
   hsts: config.isProd()
     ? { maxAge: 31536000, includeSubDomains: true, preload: true }
     : false,
   referrerPolicy:           { policy: 'strict-origin-when-cross-origin' },
-  crossOriginEmbedderPolicy: false, // Allow CDN resources
+  crossOriginEmbedderPolicy: false,
 });
 
 /**
