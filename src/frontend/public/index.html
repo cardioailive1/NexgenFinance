@@ -279,7 +279,7 @@ a{color:inherit}
 <!-- ══════════════════════════════════════════════════════════ -->
 <!-- AUTH WALL                                                   -->
 <!-- ══════════════════════════════════════════════════════════ -->
-<div id="authWall">
+<div id="authWall" style="display:flex">
   <div class="auth-inner">
 
     <!-- Brand header -->
@@ -1392,8 +1392,6 @@ function toast(msg){
 
 // Init on load
 document.addEventListener('DOMContentLoaded', function(){
-  setModule('statements');
-  // Check auth in background — app is always visible
   checkAuth();
 });
 </script>
@@ -1405,7 +1403,6 @@ document.addEventListener('DOMContentLoaded', function(){
 
 // Check session on load — redirect to /auth.html if not authenticated
 window.checkAuth = async function() {
-  // Clear any OAuth error from URL
   var params = new URLSearchParams(window.location.search);
   var oauthError = params.get('error');
   if (window.location.search) history.replaceState(null, '', window.location.pathname);
@@ -1417,16 +1414,16 @@ window.checkAuth = async function() {
       onSignedIn(user);
       return;
     }
-  } catch(e) { /* network error — show banner */ }
+  } catch(e) { /* show auth wall */ }
 
-  // Not signed in — show banner, keep app usable
-  var banner = document.getElementById('signinBanner');
-  if (banner) banner.classList.add('visible');
+  // Not signed in — show auth wall
+  var wall = document.getElementById('authWall');
+  if (wall) wall.style.display = 'flex';
 
   if (oauthError && oauthError !== 'provider_not_configured') {
     setTimeout(function(){
-      toast('\u26A0 Sign-in error. Please try again.');
-    }, 300);
+      toast('\u26A0 Sign-in failed. Please try again.');
+    }, 400);
   }
 };
 
@@ -1435,13 +1432,15 @@ window.onSignedIn = function(user) {
   _user = user;
   var name = (user.name || user.email || 'User').split(' ')[0];
 
-  // Hide auth wall if it was shown
+  // Hide auth wall, show app
   var wall = document.getElementById('authWall');
   if (wall) wall.style.display = 'none';
 
-  // Hide signin banner
   var banner = document.getElementById('signinBanner');
   if (banner) banner.classList.remove('visible');
+
+  // Init the app now that user is signed in
+  setModule('statements');
 
   // Show user pill
   var pill = document.getElementById('userPill');
